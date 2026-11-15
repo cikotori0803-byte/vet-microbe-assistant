@@ -406,7 +406,7 @@
   <div class="panel" id="panel-drug">
     <div class="card">
       <h2><span class="bar"></span>给药剂量换算</h2>
-      <div class="hint">选动物、药物、体重和药品规格，自动换算单次剂量、配液浓度与给药体积，并同步提示休药期与配伍禁忌。</div>
+      <div class="hint">选动物、药物、体重与剂型，输入药品规格，自动换算单次剂量、加液量与给药体积（粉剂按推荐使用浓度倒推加液量），并同步提示休药期与配伍禁忌。</div>
       <div class="grid3">
         <div><label class="f">动物种类</label>
           <select class="in" id="species" onchange="calcDrug()">
@@ -415,16 +415,29 @@
           </select>
         </div>
         <div><label class="f">药物</label>
-          <select class="in" id="drugSel" onchange="initSpecSelect()"></select>
+          <select class="in" id="drugSel" onchange="onDrugChange()"></select>
         </div>
         <div><label class="f">体重（kg）</label>
           <input class="in" id="weight" type="number" min="0.1" step="0.1" value="20" oninput="calcDrug()" />
         </div>
-        <div><label class="f">药品规格</label>
-          <select class="in" id="specSel" onchange="calcDrug()"></select>
+        <div><label class="f">剂型</label>
+          <select class="in" id="formSel" onchange="onFormChange()">
+            <option value="粉">粉剂配液（粉针）</option>
+            <option value="液">注射液</option>
+            <option value="片">片剂（口服）</option>
+          </select>
         </div>
-        <div id="diluteWrap"><label class="f">配液体积（mL）</label>
-          <input class="in" id="diluteVol" type="number" min="0.1" step="0.5" value="5" oninput="calcDrug()" />
+        <div><label class="f" id="contentLabel">每瓶/袋含量</label>
+          <div class="flex" style="flex-wrap:nowrap;gap:6px">
+            <input class="in" id="specContent" type="number" min="0" step="any" oninput="calcDrug()" />
+            <span class="small muted" id="contentUnit" style="flex:none;align-self:center">mg</span>
+          </div>
+        </div>
+        <div id="concWrap"><label class="f">推荐使用浓度</label>
+          <div class="flex" style="flex-wrap:nowrap;gap:6px">
+            <input class="in" id="recommendConc" type="number" min="0" step="any" oninput="calcDrug()" />
+            <span class="small muted" id="concUnit" style="flex:none;align-self:center">mg/mL</span>
+          </div>
         </div>
       </div>
       <div id="drugResult" class="mt12"></div>
@@ -879,6 +892,16 @@ const DRUG_SPECS = {
 };
 
 /* ============================================================
+   数据层：推荐使用浓度（粉剂配液依据，单位 = 剂量单位/mL）
+   ============================================================ */
+const RECOMMEND_CONC = {
+  "青霉素G":100000, "氨苄西林":200, "阿莫西林":150, "头孢噻呋":50,
+  "庆大霉素":40, "恩诺沙星":25, "土霉素":200, "多西环素":50,
+  "磺胺嘧啶":100, "伊维菌素":10, "左旋咪唑":50,
+  "地塞米松":5, "氟尼辛葡甲胺":50, "阿托品":0.5
+};
+
+/* ============================================================
    数据层：习题库
    ============================================================ */
 const QUESTIONS = [
@@ -1282,24 +1305,58 @@ function downloadText(name, content){
    ============================================================ */
 function initDrugSelect(){
   $('drugSel').innerHTML=DRUGS.map((d,i)=>`<option value="${i}">${d.name}（${d.cat}）</option>`).join('');
-  initSpecSelect();
+  onDrugChange();
 }
-function initSpecSelect(){
-  const d=DRUGS[+$('drugSel').value];
+function currentDrug(){return DRUGS[+$('drugSel').value];}
+function onDrugChange(){
+  const d=currentDrug();
   if(!d)return;
   const specs=DRUG_SPECS[d.name]||[];
-  $('specSel').innerHTML=specs.length?specs.map((s,i)=>`<option value="${i}">${esc(s.label)}</option>`).join(''):`<option value="">—</option>`;
-  updateDiluteVisibility();
+  const first=specs[0];
+  if(first)$('formSel').value=first.form;
+  const rc=RECOMMEND_CONC[d.name];
+  $('recommendConc').value=(rc!=null)?rc:'';
+  fillSpecContent(d);
+  updateFormUI(d);
   calcDrug();
 }
-function updateDiluteVisibility(){
-  const d=DRUGS[+$('drugSel').value];
+function onFormChange(){
+  const d=currentDrug();
+  if(!d)return;
+  fillSpecContent(d);
+  updateFormUI(d);
+  calcDrug();
+}
+function fillSpecContent(d){
+  const form=$('formSel').value;
   const specs=DRUG_SPECS[d.name]||[];
-  const spec=specs[+$('specSel').value];
-  $('diluteWrap').style.display=(spec&&spec.form==='粉')?'block':'none';
+  const spec=specs.find(s=>s.form===form);
+  if(spec){
+    $('specContent').value=(form==='液')?(spec.conc||0):(spec.content||0);
+  } else {
+    $('specContent').value='';
+  }
+}
+function updateFormUI(d){
+  const form=$('formSel').value;
+  const baseUnit=d.unit.replace('/kg','');
+  if(form==='液'){
+    $('contentLabel').textContent='浓度';
+    $('contentUnit').textContent=baseUnit+'/mL';
+    $('concWrap').style.display='none';
+  } else if(form==='片'){
+    $('contentLabel').textContent='每片含量';
+    $('contentUnit').textContent='mg';
+    $('concWrap').style.display='none';
+  } else {
+    $('contentLabel').textContent='每瓶/袋含量';
+    $('contentUnit').textContent=baseUnit;
+    $('concWrap').style.display='block';
+    $('concUnit').textContent=baseUnit+'/mL';
+  }
 }
 function calcDrug(){
-  const d=DRUGS[+$('drugSel').value];
+  const d=currentDrug();
   const sp=$('species').value;
   const w=parseFloat($('weight').value);
   if(!d)return;
@@ -1307,23 +1364,28 @@ function calcDrug(){
   const [min,max]=d.dose[sp];
   const lo=min*w, hi=max*w;
   const unit=d.unit; const baseUnit=unit.replace('/kg','');
-  const specs=DRUG_SPECS[d.name]||[];
-  const spec=specs[+$('specSel').value];
-  updateDiluteVisibility();
+  const form=$('formSel').value;
+  const content=parseFloat($('specContent').value);
   let convHtml='';
-  if(spec){
-    if(spec.form==='粉'){
-      const vol=parseFloat($('diluteVol').value);
-      if(vol&&vol>0){
-        const conc=spec.content/vol;
-        convHtml=`<div class="dcell full"><div class="dk">💧 粉剂配液 → 给药体积</div><div class="dv">${esc(spec.label)}（${fmtDose(spec.content)} ${baseUnit}）加溶媒 ${vol} mL → 浓度 <b>${fmtDose(conc)} ${baseUnit}/mL</b><br>需抽取给药体积：<b style="color:var(--primary);font-size:16px">${fmtVol(lo/conc)} ~ ${fmtVol(hi/conc)} mL</b></div></div>`;
-      } else {
-        convHtml=`<div class="dcell full"><div class="dk">💧 粉剂配液 → 给药体积</div><div class="dv" style="color:var(--warn)">请填写配液体积（mL）</div></div>`;
-      }
-    } else if(spec.form==='液'){
-      convHtml=`<div class="dcell full"><div class="dk">💧 给药体积（注射液）</div><div class="dv">${esc(spec.label)}（浓度 ${spec.conc} ${baseUnit}/mL）<br>需抽取给药体积：<b style="color:var(--primary);font-size:16px">${fmtVol(lo/spec.conc)} ~ ${fmtVol(hi/spec.conc)} mL</b></div></div>`;
-    } else if(spec.form==='片'){
-      convHtml=`<div class="dcell full"><div class="dk">💊 给药片数（口服）</div><div class="dv">${esc(spec.label)}<br>需喂服：<b style="color:var(--primary);font-size:16px">${Math.ceil(lo/spec.content)} ~ ${Math.ceil(hi/spec.content)} 片</b>（向上取整）</div></div>`;
+  if(form==='粉'){
+    const conc=parseFloat($('recommendConc').value);
+    if(content>0&&conc>0){
+      const addVol=content/conc;
+      convHtml=`<div class="dcell full"><div class="dk">💧 粉剂配液（按推荐浓度）</div><div class="dv">含量 ${fmtDose(content)} ${baseUnit} ÷ 推荐浓度 ${fmtDose(conc)} ${baseUnit}/mL → <b style="color:var(--ok)">应加溶媒 ${fmtVol(addVol)} mL</b><br>配好后需抽取给药体积：<b style="color:var(--primary);font-size:16px">${fmtVol(lo/conc)} ~ ${fmtVol(hi/conc)} mL</b></div></div>`;
+    } else {
+      convHtml=`<div class="dcell full"><div class="dk">💧 粉剂配液</div><div class="dv" style="color:var(--warn)">请填写规格含量与推荐使用浓度</div></div>`;
+    }
+  } else if(form==='液'){
+    if(content>0){
+      convHtml=`<div class="dcell full"><div class="dk">💧 给药体积（注射液）</div><div class="dv">浓度 ${fmtDose(content)} ${baseUnit}/mL<br>需抽取给药体积：<b style="color:var(--primary);font-size:16px">${fmtVol(lo/content)} ~ ${fmtVol(hi/content)} mL</b></div></div>`;
+    } else {
+      convHtml=`<div class="dcell full"><div class="dk">💧 给药体积</div><div class="dv" style="color:var(--warn)">请填写注射液浓度</div></div>`;
+    }
+  } else {
+    if(content>0){
+      convHtml=`<div class="dcell full"><div class="dk">💊 给药片数（口服）</div><div class="dv">每片 ${fmtDose(content)} mg<br>需喂服：<b style="color:var(--primary);font-size:16px">${Math.ceil(lo/content)} ~ ${Math.ceil(hi/content)} 片</b>（向上取整）</div></div>`;
+    } else {
+      convHtml=`<div class="dcell full"><div class="dk">💊 给药片数</div><div class="dv" style="color:var(--warn)">请填写每片含量</div></div>`;
     }
   }
   $('drugResult').innerHTML=`
