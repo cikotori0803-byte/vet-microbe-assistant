@@ -1257,13 +1257,13 @@ function calcDrug(){
   if(!w||w<=0){$('drugResult').innerHTML='<div class="small muted">请输入有效体重</div>';return}
   const [min,max]=d.dose[sp];
   const lo=min*w, hi=max*w;
-  const unit=d.unit;
+  const unit=d.unit; const baseUnit=unit.replace('/kg','');
   $('drugResult').innerHTML=`
     <div class="result-box">
       <div class="spread">
         <div>
           <div class="small muted">${esc(sp)} · ${esc(d.name)} · 体重 ${w} kg</div>
-          <div style="font-size:24px;font-weight:800;color:var(--primary)">${fmtDose(lo)} ~ ${fmtDose(hi)} ${unit}</div>
+          <div style="font-size:24px;font-weight:800;color:var(--primary)">${fmtDose(lo)} ~ ${fmtDose(hi)} ${baseUnit}</div>
           <div class="small muted">单次给药剂量（按 ${min}~${max} ${unit} 计算）</div>
         </div>
         <span class="badge b">${esc(d.cat)}</span>
