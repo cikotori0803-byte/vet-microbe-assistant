@@ -1,0 +1,1374 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="兽学辅研 · 兽医微生物与药理一体化智能学习助手：病原检索、特征向导精确识别、LD50计算、攻毒实验指引、兽药剂量换算、刷题练习" />
+<title>兽学辅研 · 微生物智能学习助手</title>
+<style>
+  :root{
+    --primary:#2f6fed; --primary-2:#4d8bff; --primary-deep:#1f4fbf;
+    --primary-light:#eaf2fe; --primary-bg:#f4f8ff;
+    --bg:#f5f8fc; --card:#ffffff; --border:#e3ebf5; --border-2:#d6e3f2;
+    --text:#1f2d3d; --muted:#6b7a8d; --muted-2:#93a3b5;
+    --danger:#e5484d; --warn:#e0a41c; --ok:#23a06b;
+    --shadow:0 1px 2px rgba(31,45,61,.05),0 4px 16px rgba(31,45,61,.06);
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    background:var(--bg); color:var(--text); font-size:14px; line-height:1.6;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  input,select,textarea{font-family:inherit;font-size:14px;color:var(--text)}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:#c9d7e8;border-radius:8px}
+  ::-webkit-scrollbar-thumb:hover{background:#b3c6dc}
+
+  .app{max-width:1180px;margin:0 auto;padding:0 16px 60px}
+
+  /* ===== 顶部 ===== */
+  .topbar{
+    position:sticky;top:0;z-index:50;background:linear-gradient(120deg,#1f4fbf,#2f6fed 55%,#4d8bff);
+    color:#fff;padding:14px 0;box-shadow:0 2px 12px rgba(31,79,191,.25);
+  }
+  .topbar-in{max-width:1180px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand .logo{width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;flex:none}
+  .brand h1{font-size:19px;font-weight:700;letter-spacing:.5px}
+  .brand .sub{font-size:12px;opacity:.85;margin-top:2px}
+  .top-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .btn-top{
+    display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:9px;
+    background:rgba(255,255,255,.14);color:#fff;font-size:13px;font-weight:600;
+    border:1px solid rgba(255,255,255,.22);transition:.15s;
+  }
+  .btn-top:hover{background:rgba(255,255,255,.26)}
+
+  /* ===== 快捷按钮区 ===== */
+  .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:18px 0 6px}
+  .qbtn{
+    position:relative;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+    padding:15px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);transition:.16s;text-align:left;
+  }
+  .qbtn:hover{transform:translateY(-2px);border-color:var(--primary-2);box-shadow:0 6px 20px rgba(47,111,237,.14)}
+  .qbtn .qico{width:42px;height:42px;border-radius:10px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none}
+  .qbtn .qt b{display:block;font-size:15px;color:var(--text)}
+  .qbtn .qt span{font-size:12px;color:var(--muted)}
+  .qbtn .qnum{position:absolute;top:8px;right:10px;font-size:11px;color:var(--muted-2);font-weight:600}
+
+  /* ===== 标签页 ===== */
+  .tabs{display:flex;gap:4px;margin:16px 0 18px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:5px;box-shadow:var(--shadow);flex-wrap:wrap}
+  .tab{
+    flex:1;min-width:110px;padding:9px 6px;border-radius:8px;font-size:14px;font-weight:600;color:var(--muted);
+    display:flex;align-items:center;justify-content:center;gap:7px;transition:.15s;
+  }
+  .tab:hover{color:var(--primary)}
+  .tab.active{background:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(47,111,237,.35)}
+
+  .panel{display:none}
+  .panel.active{display:block}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:16px}
+  .card h2{font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .card h2 .bar{width:4px;height:16px;background:var(--primary);border-radius:3px;flex:none}
+  .card .hint{font-size:12.5px;color:var(--muted);margin-bottom:12px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}.quick{grid-template-columns:1fr 1fr}}
+  /* ===== 手机端适配 ===== */
+  @media(max-width:600px){
+    body{font-size:13.5px}
+    .app{padding:0 10px 40px}
+    .topbar{padding:10px 0}
+    .topbar-in{padding:0 12px;gap:10px}
+    .brand .logo{width:36px;height:36px;border-radius:9px}
+    .brand h1{font-size:15.5px;letter-spacing:.2px}
+    .brand .sub{font-size:11px}
+    .btn-top{padding:7px 10px;font-size:12px}
+    .quick{gap:8px;margin:12px 0 4px}
+    .qbtn{padding:12px 10px;gap:9px;border-radius:11px}
+    .qbtn .qico{width:36px;height:36px;border-radius:9px}
+    .qbtn .qt b{font-size:14px}
+    .qbtn .qt span{font-size:11px}
+    .qbtn .qnum{top:6px;right:8px;font-size:10px}
+    .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:4px;gap:4px;margin:12px 0 14px}
+    .tab{min-width:auto;padding:8px 11px;font-size:13px;white-space:nowrap;flex:none}
+    .card{padding:14px;border-radius:11px;margin-bottom:12px}
+    .card h2{font-size:15px}
+    .card .hint{font-size:12px}
+    .detail-grid{grid-template-columns:1fr}
+    .dcell{padding:10px 12px;border-right:none}
+    .optlist{grid-template-columns:1fr}
+    .result-box .big{font-size:22px}
+    .result-box{padding:12px}
+    .wiz-q{font-size:15px}
+    .flex{gap:8px}
+    .btn{padding:9px 14px}
+    .ld-in input{width:70px}
+  }
+
+  label.f{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px}
+  .in,select.in,textarea.in{
+    width:100%;padding:9px 12px;border:1px solid var(--border-2);border-radius:9px;background:#fff;outline:none;transition:.15s;
+  }
+  .in:focus,select.in:focus{border-color:var(--primary-2);box-shadow:0 0 0 3px rgba(47,111,237,.12)}
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;border-radius:9px;
+    background:var(--primary);color:#fff;font-size:14px;font-weight:600;transition:.15s;box-shadow:0 2px 8px rgba(47,111,237,.25);
+  }
+  .btn:hover{background:var(--primary-deep)}
+  .btn.ghost{background:#fff;color:var(--primary);border:1px solid var(--border-2);box-shadow:none}
+  .btn.ghost:hover{background:var(--primary-light)}
+  .btn.sm{padding:6px 11px;font-size:12.5px}
+  .btn.line{background:transparent;color:var(--primary);box-shadow:none;padding:6px 10px;border:1px solid transparent}
+  .btn.line:hover{background:var(--primary-light)}
+  .btn.danger{background:var(--danger)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  /* 特征筛选 chips */
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    padding:6px 12px;border-radius:20px;border:1px solid var(--border-2);background:#fff;color:var(--muted);
+    font-size:13px;font-weight:500;transition:.13s;
+  }
+  .chip:hover{border-color:var(--primary-2);color:var(--primary)}
+  .chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+
+  /* 菌种卡片 */
+  .bcard{border:1px solid var(--border);border-radius:11px;overflow:hidden;transition:.15s;background:#fff}
+  .bcard:hover{border-color:var(--primary-2);box-shadow:0 4px 16px rgba(47,111,237,.12)}
+  .bcard .bh{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .bcard .bh .bn{font-size:15px;font-weight:700}
+  .bcard .bh .be{font-size:12px;color:var(--muted);font-style:italic}
+  .tags{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 12px}
+  .tag{font-size:11.5px;padding:3px 9px;border-radius:6px;background:var(--primary-light);color:var(--primary);font-weight:600}
+  .tag.g1{background:#fdeef0;color:#c2394c}
+  .tag.g2{background:#eef6ff;color:#1f6fd8}
+  .tag.w{background:#fff6e8;color:#b8860b}
+  .bcard .bfoot{padding:9px 14px;border-top:1px dashed var(--border);display:flex;justify-content:space-between;align-items:center}
+
+  /* 详情 */
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  @media(max-width:760px){.detail-grid{grid-template-columns:1fr}}
+  .dcell{padding:11px 13px;border-bottom:1px solid var(--border);border-right:1px solid var(--border)}
+  .dcell:nth-child(2n){border-right:none}
+  .dcell .dk{font-size:12px;color:var(--muted);font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:5px}
+  .dcell .dv{font-size:13.5px;color:var(--text);white-space:pre-wrap}
+  .dcell.full{grid-column:1/-1;border-right:none}
+
+  .badge{display:inline-block;padding:2px 9px;border-radius:6px;font-size:12px;font-weight:600}
+  .badge.g{background:#e8f6ef;color:#168a54}
+  .badge.r{background:#fdecec;color:#c0392b}
+  .badge.b{background:var(--primary-light);color:var(--primary)}
+  .badge.y{background:#fff4de;color:#b07a06}
+
+  /* 向导 */
+  .wiz{max-width:640px;margin:0 auto}
+  .wiz-step{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+  .dot{width:28px;height:28px;border-radius:50%;background:#e7eef8;color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex:none}
+  .dot.on{background:var(--primary);color:#fff}
+  .dot.done{background:var(--primary-light);color:var(--primary)}
+  .wiz-line{flex:1;height:2px;background:#e7eef8;min-width:20px}
+  .wiz-line.on{background:var(--primary)}
+  .wiz-q{font-size:16px;font-weight:700;margin-bottom:14px}
+  .wiz-count{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .optlist{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:520px){.optlist{grid-template-columns:1fr}}
+  .opt{
+    border:1.5px solid var(--border-2);border-radius:10px;padding:13px;text-align:left;font-size:14px;font-weight:600;
+    color:var(--text);background:#fff;transition:.14s;display:flex;align-items:center;gap:9px;
+  }
+  .opt:hover{border-color:var(--primary-2);background:var(--primary-bg)}
+  .opt .oico{width:30px;height:30px;border-radius:8px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;flex:none}
+
+  /* 表格 */
+  table.tb{width:100%;border-collapse:collapse;font-size:13px}
+  table.tb th,table.tb td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+  table.tb th{background:var(--primary-bg);color:var(--primary-deep);font-weight:700;font-size:12.5px;white-space:nowrap}
+  table.tb tr:hover td{background:#fafcff}
+  .tablewrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px}
+
+  /* LD50 */
+  .ld-in{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+  .ld-in input{width:90px}
+  .result-box{background:var(--primary-bg);border:1px solid var(--border-2);border-radius:10px;padding:14px;margin-top:12px}
+  .result-box .big{font-size:26px;font-weight:800;color:var(--primary)}
+  .calc-step{font-size:12.5px;color:var(--muted);margin-top:6px;white-space:pre-wrap;line-height:1.8}
+
+  /* 刷题 */
+  .quiz-q{font-size:15.5px;font-weight:700;margin-bottom:12px;line-height:1.6}
+  .quiz-q .no{color:var(--primary);margin-right:6px}
+  .qopt{display:block;width:100%;text-align:left;padding:11px 14px;border:1.5px solid var(--border-2);border-radius:10px;margin-bottom:9px;font-size:14px;transition:.13s;background:#fff}
+  .qopt:hover{border-color:var(--primary-2);background:var(--primary-bg)}
+  .qopt.correct{border-color:var(--ok);background:#e8f6ef;color:#127a49}
+  .qopt.wrong{border-color:var(--danger);background:#fdecec;color:#b3261e}
+  .qopt .mark{margin-left:8px;font-weight:700}
+  .explain{margin-top:12px;padding:12px 14px;border-radius:9px;background:#fff8e8;border:1px solid #f3e3b8;font-size:13.5px}
+  .explain b{color:#9a6700}
+  .quiz-stat{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+  .wrong-list{padding:8px 0}
+  .wrong-item{padding:10px 12px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;font-size:13px}
+  .wrong-item .wi-q{font-weight:600;margin-bottom:4px}
+  .wrong-item .wi-a{color:var(--ok)}
+  .wrong-item .wi-y{color:var(--danger)}
+
+  .flow-step{display:flex;gap:12px;margin-bottom:12px}
+  .flow-step .fs-n{width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none;margin-top:2px}
+  .flow-step .fs-t b{display:block;font-size:14px}
+  .flow-step .fs-t span{font-size:13px;color:var(--muted)}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2d3d;color:#fff;padding:10px 18px;border-radius:10px;font-size:13.5px;opacity:0;pointer-events:none;transition:.25s;z-index:99;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  .empty{padding:34px;text-align:center;color:var(--muted-2)}
+  .empty .ei{font-size:40px;margin-bottom:8px}
+  .mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+  .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .spread{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .muted{color:var(--muted)}.small{font-size:12.5px}
+  .mono{font-family:ui-monospace,Consolas,monospace}
+
+  .intro-list{padding-left:0;list-style:none}
+  .intro-list li{position:relative;padding:10px 12px 10px 34px;border-bottom:1px dashed var(--border)}
+  .intro-list li:last-child{border-bottom:none}
+  .intro-list li .ik{position:absolute;left:6px;top:11px;width:20px;height:20px;border-radius:6px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  .intro-list li b{display:block;font-size:14px}
+  .intro-list li span{font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="2.6"/><circle cx="6" cy="12" r="1.9"/><circle cx="18" cy="12" r="1.9"/><circle cx="9" cy="16.5" r="1.6"/><circle cx="15" cy="16.5" r="1.6"/><circle cx="12" cy="19.5" r="1.3"/><path d="M7 12h10M9.6 9.4l5 2.6M14.4 9.4l-5 2.6"/></svg>
+      </div>
+      <div>
+        <h1>兽学辅研 · 微生物智能学习助手</h1>
+        <div class="sub">兽医微生物 · 兽医药理 · 科研工具一体化｜动物医学专业学习工具</div>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn-top" onclick="go('intro')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        使用说明·优点
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- 快捷入口 -->
+  <div class="quick">
+    <button class="qbtn" onclick="go('pathogen')">
+      <span class="qico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+      <span class="qt"><b>病原检索</b><span>菌落·镜下·生化·药敏·考点</span></span>
+      <span class="qnum">模块1</span>
+    </button>
+    <button class="qbtn" onclick="go('ld50')">
+      <span class="qico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg></span>
+      <span class="qt"><b>LD₅₀ 计算</b><span>攻毒实验·流程·模板</span></span>
+      <span class="qnum">模块2</span>
+    </button>
+    <button class="qbtn" onclick="go('drug')">
+      <span class="qico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v5l-5 8a2.5 2.5 0 0 0 4.4 2.3L12 14l2.6 4.3A2.5 2.5 0 0 0 19 16l-5-8V3"/></svg></span>
+      <span class="qt"><b>兽药换算</b><span>剂量·休药期·配伍禁忌</span></span>
+      <span class="qnum">模块3</span>
+    </button>
+    <button class="qbtn" onclick="go('quiz')">
+      <span class="qico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg></span>
+      <span class="qt"><b>刷题练习</b><span>微生物·药理·科研</span></span>
+      <span class="qnum">模块4</span>
+    </button>
+  </div>
+
+  <!-- 标签页 -->
+  <div class="tabs">
+    <button class="tab active" data-tab="pathogen" onclick="go('pathogen')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      微生物辅助
+    </button>
+    <button class="tab" data-tab="ld50" onclick="go('ld50')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>
+      科研工具包
+    </button>
+    <button class="tab" data-tab="drug" onclick="go('drug')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3h6M10 3v5l-5 8a2.5 2.5 0 0 0 4.4 2.3L12 14l2.6 4.3A2.5 2.5 0 0 0 19 16l-5-8V3"/></svg>
+      药理速算
+    </button>
+    <button class="tab" data-tab="quiz" onclick="go('quiz')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5M8 17h3"/></svg>
+      刷题练习
+    </button>
+    <button class="tab" data-tab="intro" onclick="go('intro')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+      使用说明
+    </button>
+  </div>
+
+  <!-- ================= 模块1：病原检索 ================= -->
+  <div class="panel active" id="panel-pathogen">
+    <div class="card">
+      <h2><span class="bar"></span>智能鉴定向导（精确识别）</h2>
+      <div class="hint">像实验课镜检那样，一步步回答染色与形态问题，系统逐级缩小范围，精准锁定菌种。</div>
+      <div class="flex">
+        <button class="btn" onclick="startWizard()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+          开始特征向导鉴定
+        </button>
+        <button class="btn ghost" onclick="resetWizard()">重置</button>
+      </div>
+      <div id="wizardBox" class="mt12"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="bar"></span>特征筛选</h2>
+      <div class="hint">直接勾选你观察到的特征，右侧实时列出符合条件的菌种。</div>
+      <div class="grid2">
+        <div>
+          <div id="filterBox"></div>
+          <div class="flex mt12">
+            <button class="btn sm ghost" onclick="clearFilters()">清空筛选</button>
+            <span class="small muted" id="filterCount"></span>
+          </div>
+        </div>
+        <div id="filterResults"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="bar"></span>关键词 / 菌名检索</h2>
+      <div class="hint">输入菌名、别名、疾病或关键词（如"大肠杆菌""乳腺炎""炭疽"），支持模糊匹配。</div>
+      <div class="flex">
+        <input class="in" id="searchInput" style="max-width:420px" placeholder="输入菌名 / 别名 / 所致疾病 / 关键词…" onkeydown="if(event.key==='Enter')doSearch()" />
+        <button class="btn" onclick="doSearch()">检索</button>
+        <button class="btn ghost" onclick="renderAllBacteria()">浏览全部菌种</button>
+      </div>
+      <div id="searchResults" class="mt12"></div>
+    </div>
+    <div id="detailMount"></div>
+  </div>
+
+  <!-- ================= 模块2：科研工具包 ================= -->
+  <div class="panel" id="panel-ld50">
+    <div class="card">
+      <h2><span class="bar"></span>LD₅₀ 半数致死量计算（Reed-Muench 法）</h2>
+      <div class="hint">输入小鼠攻毒实验各剂量组的动物数与死亡数，自动累计并计算半数致死量（LD₅₀）。</div>
+      <div class="grid2">
+        <div>
+          <div class="flex">
+            <button class="btn sm" onclick="addGroup()">＋ 添加剂量组</button>
+            <button class="btn sm ghost" onclick="loadExample()">载入示例数据</button>
+            <button class="btn sm ghost" onclick="clearGroups()">清空</button>
+          </div>
+          <div id="groupBox" class="mt12"></div>
+          <button class="btn mt12" onclick="calcLD50()">计算 LD₅₀</button>
+        </div>
+        <div id="ld50Result"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="bar"></span>小鼠攻毒实验流程指引</h2>
+      <div class="hint">适用于细菌毒力 / 半数致死量测定的 BALB/c 小鼠攻毒模型。</div>
+      <div id="flowBox"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="bar"></span>实验记录模板</h2>
+      <div class="hint">按规范字段生成实验记录模板，可一键下载为 .txt 文件（本地生成，不上传）。</div>
+      <div class="flex">
+        <button class="btn" onclick="downloadTemplate()">下载实验记录模板</button>
+        <button class="btn ghost" onclick="downloadLD50Report()">导出当前 LD₅₀ 计算报告</button>
+      </div>
+      <div class="tablewrap mt12">
+        <table class="tb">
+          <thead><tr><th>记录字段</th><th>说明</th></tr></thead>
+          <tbody>
+            <tr><td>实验名称 / 编号</td><td>如：金黄色葡萄球菌 LD₅₀ 测定 - 2026-01</td></tr>
+            <tr><td>实验动物</td><td>品系、性别、体重范围、数量、分组</td></tr>
+            <tr><td>菌株与攻毒剂量</td><td>菌种、浓度(CFU/mL)、攻毒途径(腹腔/皮下/灌胃)、剂量梯度</td></tr>
+            <tr><td>观察指标</td><td>死亡数、发病时间、临床症状、尸检病变</td></tr>
+            <tr><td>结果记录</td><td>各剂量组死亡/存活数、LD₅₀ 计算结果</td></tr>
+            <tr><td>结论与备注</td><td>毒力评价、与标准株比较、注意事项</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 模块3：药理速算 ================= -->
+  <div class="panel" id="panel-drug">
+    <div class="card">
+      <h2><span class="bar"></span>给药剂量换算</h2>
+      <div class="hint">选择动物种类与药物，输入体重，一键换算单次给药剂量，并同步提示休药期与配伍禁忌。</div>
+      <div class="grid3">
+        <div><label class="f">动物种类</label>
+          <select class="in" id="species" onchange="calcDrug()">
+            <option value="牛">牛</option><option value="羊">羊</option><option value="猪">猪</option>
+            <option value="犬">犬</option><option value="猫">猫</option>
+          </select>
+        </div>
+        <div><label class="f">药物</label>
+          <select class="in" id="drugSel" onchange="calcDrug()"></select>
+        </div>
+        <div><label class="f">体重（kg）</label>
+          <input class="in" id="weight" type="number" min="0.1" step="0.1" value="20" oninput="calcDrug()" />
+        </div>
+      </div>
+      <div id="drugResult" class="mt12"></div>
+    </div>
+
+    <div class="card">
+      <h2><span class="bar"></span>药物分类对比表</h2>
+      <div class="hint">按药理分类对比常用兽药的代表药物、抗菌谱与主要注意事项。</div>
+      <div class="tablewrap">
+        <table class="tb">
+          <thead><tr><th>分类</th><th>代表药物</th><th>主要作用</th><th>关键注意点</th></tr></thead>
+          <tbody>
+            <tr><td>青霉素类</td><td>青霉素G、氨苄西林、阿莫西林</td><td>G⁺菌、螺旋体等</td><td>与抑菌剂(四环素/大环内酯)拮抗</td></tr>
+            <tr><td>头孢菌素类</td><td>头孢噻呋</td><td>广谱、抗G⁻较强</td><td>对产酶菌稳定，需注意休药期</td></tr>
+            <tr><td>氨基糖苷类</td><td>庆大霉素</td><td>G⁻杆菌</td><td>耳毒性、肾毒性</td></tr>
+            <tr><td>氟喹诺酮类</td><td>恩诺沙星</td><td>广谱、组织穿透好</td><td>幼龄动物软骨损伤</td></tr>
+            <tr><td>四环素类</td><td>土霉素、多西环素</td><td>广谱</td><td>与钙、铁等金属离子螯合</td></tr>
+            <tr><td>磺胺类</td><td>磺胺嘧啶</td><td>广谱抑菌</td><td>首剂加倍，与普鲁卡因拮抗</td></tr>
+            <tr><td>大环内酯类</td><td>泰乐菌素、泰妙菌素</td><td>G⁺菌、支原体</td><td>支原体肺炎常用</td></tr>
+            <tr><td>抗寄生虫类</td><td>伊维菌素、阿苯达唑、吡喹酮</td><td>线虫、绦虫、吸虫、外寄生虫</td><td>按寄生虫种类选药，注意休药期</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 模块4：刷题练习 ================= -->
+  <div class="panel" id="panel-quiz">
+    <div class="card">
+      <h2><span class="bar"></span>章节习题 · 考点训练</h2>
+      <div class="hint">覆盖微生物、药理、科研(LD₅₀)三大板块，作答后即时判分解析，错题自动归集。</div>
+      <div class="quiz-stat">
+        <button class="btn" onclick="startQuiz()">开始 / 重新刷题</button>
+        <button class="btn ghost" onclick="showWrong()">错题本 (<span id="wrongCount">0</span>)</button>
+        <span class="small muted" id="quizProgress"></span>
+      </div>
+      <div id="quizBox" class="mt12"></div>
+    </div>
+    <div class="card" id="wrongCard" style="display:none">
+      <h2><span class="bar"></span>错题本</h2>
+      <div class="flex"><button class="btn sm ghost" onclick="clearWrong()">清空错题本</button></div>
+      <div id="wrongBox" class="wrong-list mt12"></div>
+    </div>
+  </div>
+
+  <!-- ================= 使用说明 ================= -->
+  <div class="panel" id="panel-intro">
+    <div class="card">
+      <h2><span class="bar"></span>项目简介</h2>
+      <p style="font-size:14px;color:var(--text)">
+        《兽学辅研——兽医微生物与药理一体化智能学习助手》面向动物医学专业本科生《兽医微生物学》《兽医药理学》两门核心专业课，融合
+        <b>微生物实验辅助</b>与<b>药理用药速算</b>两大模块，并内置<b>科研工具包</b>（LD₅₀ 计算 + 小鼠攻毒实验指引），打造兼顾课内学习、实验实操、科研训练的一体化学习工具。
+      </p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2><span class="bar"></span>核心功能</h2>
+        <ul class="intro-list">
+          <li><span class="ik">1</span><b>病原检索 · 精确识别</b><span>关键词搜索 + 特征向导逐步缩小范围，输出菌落、镜下形态、生化鉴定、药敏判读、毒性、治疗与考点。</span></li>
+          <li><span class="ik">2</span><b>科研工具包</b><span>Reed-Muench 法自动计算 LD₅₀，配套小鼠攻毒实验流程、注意事项与实验记录模板。</span></li>
+          <li><span class="ik">3</span><b>兽药剂量速算</b><span>选动物、选药、输体重，一键换算给药剂量，同步提示休药期与配伍禁忌。</span></li>
+          <li><span class="ik">4</span><b>刷题练习 · 错题本</b><span>三板块章节习题，即时判分解析，错题自动归集、按类复盘。</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2><span class="bar"></span>创新点与优点</h2>
+        <ul class="intro-list">
+          <li><span class="ik">A</span><b>跨课程有机融合</b><span>打通「病原鉴定 → 药敏判读 → 用药方案」完整学习链路，区别于单一刷题工具。</span></li>
+          <li><span class="ik">B</span><b>科研赋能本科毕设</b><span>LD₅₀ 计算与攻毒实验指引直接支撑细菌致病性研究，实用性强。</span></li>
+          <li><span class="ik">C</span><b>用药安全导向</b><span>针对不同物种剂量差异、休药期、配伍禁忌做定向提醒，规避易错点。</span></li>
+          <li><span class="ik">D</span><b>轻量零安装</b><span>单文件网页应用，双击即用；数据本地存储、不上传，实验室/宿舍随时可调。</span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <h2><span class="bar"></span>演示脚本（3 分钟答辩）</h2>
+      <div id="demoFlow"></div>
+    </div>
+    <div class="card">
+      <h2><span class="bar"></span>使用小贴士</h2>
+      <ul class="intro-list">
+        <li><span class="ik">i</span><b>演示建议顺序</b><span>先用「特征向导」现场鉴一株菌 → 再算一次 LD₅₀ → 再换一例兽药剂量 → 最后刷 1-2 题并展示错题本。</span></li>
+        <li><span class="ik">i</span><b>数据说明</b><span>知识库为教学演示素材，菌种/药物数据供学习参考；临床用药与鉴定请以药典、最新规范和实验室结果为准。</span></li>
+        <li><span class="ik">i</span><b>数据安全</b><span>全部在浏览器本地运行，图片、记录、错题本均不上传服务器，隐私安全。</span></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   数据层：微生物知识库（兽医常见致病菌）
+   ============================================================ */
+const BACTERIA = [
+{name:"金黄色葡萄球菌", en:"Staphylococcus aureus", gram:"G+", shape:"球菌", arrange:"葡萄串", spore:"无", oxygen:"兼性",
+ colony:"血琼脂上呈圆形、凸起、边缘整齐的金黄色不透明菌落，多为 β 溶血环。",
+ micro:"革兰阳性球菌，呈葡萄串状排列，无芽孢、无鞭毛，部分有微荚膜。",
+ biochem:"触酶阳性、凝固酶阳性、甘露醇发酵阳性、DNA 酶阳性。",
+ drug:"多数株对青霉素敏感；耐甲氧西林株(MRSA)对 β-内酰胺类耐药，可选万古霉素等，应做药敏。",
+ toxicity:"产生 α 溶血素、肠毒素、剥脱毒素、中毒性休克毒素(TSST-1)等多种毒素，致病力强。",
+ disease:"奶牛乳房炎、皮肤化脓性感染、仔猪渗出性皮炎、食物中毒。",
+ treat:"乳腺炎/皮肤感染用青霉素类、头孢类；MRSA 感染用万古霉素等。",
+ diff:"与链球菌鉴别：触酶阳性、葡萄串状排列。",
+ points:["凝固酶阳性是主要毒力与鉴定指标","触酶试验用于与链球菌鉴别","β 溶血","耐甲氧西林金黄色葡萄球菌(MRSA)"]},
+{name:"无乳链球菌", en:"Streptococcus agalactiae", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
+ colony:"血琼脂上细小、灰白、湿润菌落，β 溶血；CAMP 试验阳性。",
+ micro:"革兰阳性球菌，链状排列，无芽孢。",
+ biochem:"CAMP 阳性、马尿酸钠水解阳性、触酶阴性。",
+ drug:"对青霉素高度敏感。",
+ toxicity:"主要致奶牛乳房炎，引起产奶量下降（无乳症）。",
+ disease:"奶牛隐性/亚临床乳腺炎（乳腺炎主要病原之一）。",
+ treat:"青霉素类、头孢类，泌乳期配合干奶期治疗。",
+ diff:"CAMP 试验阳性、马尿酸水解阳性可与其他链球菌区分。",
+ points:["CAMP 试验阳性","奶牛乳腺炎主要病原","触酶阴性（链球菌属共同特征）"]},
+{name:"猪链球菌", en:"Streptococcus suis", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
+ colony:"血琼脂上细小菌落，多为 α 溶血。",
+ micro:"革兰阳性球菌，链状排列，多有荚膜。",
+ biochem:"触酶阴性。",
+ drug:"对青霉素、头孢类敏感。",
+ toxicity:"荚膜抗吞噬，可致败血症、脑膜炎；血清 2 型人畜共患。",
+ disease:"猪链球菌病（脑膜炎、败血症、关节炎、心内膜炎），2 型可感染人。",
+ treat:"青霉素类、头孢菌素类，早用足量。",
+ diff:"根据血清型（1、2、7、9 型）分型，2 型为重要人畜共患型。",
+ points:["猪链球菌病","血清 2 型人畜共患","可致脑膜炎、败血症"]},
+{name:"马链球菌马亚种", en:"Streptococcus equi subsp. equi", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
+ colony:"血琼脂上呈黏液状、β 溶血，长链状排列。",
+ micro:"革兰阳性球菌，呈长链排列。",
+ biochem:"触酶阴性，发酵山梨醇、不发酵海藻糖。",
+ drug:"对青霉素敏感。",
+ toxicity:"引起马腺疫，颌下淋巴结化脓性炎症。",
+ disease:"马腺疫（幼驹常见）。",
+ treat:"青霉素，脓肿成熟后切开排脓。",
+ diff:"马腺疫链球菌，长链、黏液状菌落。",
+ points:["马腺疫病原","幼驹常见"]},
+{name:"炭疽芽孢杆菌", en:"Bacillus anthracis", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"需氧",
+ colony:"灰白色、粗糙、边缘不整齐的卷发状(R 型)菌落。",
+ micro:"革兰阳性粗大杆菌，竹节状排列，有荚膜，芽孢位于中央、椭圆形。",
+ biochem:"触酶阳性，能液化明胶。",
+ drug:"对青霉素敏感。",
+ toxicity:"产生炭疽毒素（水肿因子、致死因子、保护性抗原），人畜共患，病死率高。",
+ disease:"炭疽（牛、羊最易感，脾脏显著肿大）。",
+ treat:"青霉素，皮肤型、肠型、肺型炭疽早期治疗。",
+ diff:"卷发状菌落、竹节状排列、Ascoli 沉淀反应阳性。",
+ points:["卷发状菌落","竹节状排列","人畜共患","Ascoli 沉淀反应"]},
+{name:"产气荚膜梭菌", en:"Clostridium perfringens", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
+ colony:"血琼脂双溶血环；卵黄琼脂(Nagler)上乳白浑浊（卵磷脂酶）。",
+ micro:"革兰阳性粗大杆菌，有荚膜，芽孢位于中央或近端。",
+ biochem:"卵磷脂酶(α 毒素)阳性、牛奶培养基「暴烈发酵」。",
+ drug:"青霉素；气性坏疽需配合清创、高压氧。",
+ toxicity:"产生 α 毒素（卵磷脂酶）等多种外毒素，引起组织坏死、气性坏疽。",
+ disease:"气性坏疽、羊猝狙、坏死性肠炎、食物中毒。",
+ treat:"清创 + 青霉素，必要时高压氧治疗。",
+ diff:"双溶血环、牛奶暴烈发酵、卵磷脂酶阳性。",
+ points:["双溶血环","牛奶暴烈发酵","羊猝狙病原"]},
+{name:"破伤风梭菌", en:"Clostridium tetani", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
+ colony:"血琼脂上呈薄膜状迁徙生长，可溶血。",
+ micro:"革兰阳性杆菌，芽孢位于末端、呈鼓槌状。",
+ biochem:"不发酵糖类，明胶液化。",
+ drug:"青霉素；破伤风抗毒素(TAT)中和毒素。",
+ toxicity:"产生破伤风痉挛毒素（神经毒素），引起肌肉强直性痉挛。",
+ disease:"破伤风（牙关紧闭、角弓反张）。",
+ treat:"清创 + 青霉素 + 破伤风抗毒素，对症镇痉。",
+ diff:"鼓槌状芽孢、不发酵糖类。",
+ points:["鼓槌状芽孢","痉挛毒素","厌氧环境致病"]},
+{name:"肉毒梭菌", en:"Clostridium botulinum", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
+ colony:"血琼脂上β溶血，边缘呈羽毛状。",
+ micro:"革兰阳性杆菌，芽孢偏端、椭圆形，呈网球拍状。",
+ biochem:"水解明胶，产生神经毒素。",
+ drug:"早期用多价抗毒素；无特效抗生素方案。",
+ toxicity:"产生肉毒毒素（已知毒性最强的神经毒素），引起肌肉松弛性麻痹。",
+ disease:"肉毒中毒（吞咽困难、呼吸麻痹）。",
+ treat:"尽早用多价抗毒素，对症支持。",
+ diff:"网球拍状芽孢、神经毒素。",
+ points:["肉毒毒素毒性最强","引起肌肉麻痹","食物中毒"]},
+{name:"单核细胞增生李斯特菌", en:"Listeria monocytogenes", gram:"G+", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"血琼脂上窄 β 溶血；半固体培养基 25℃ 呈「伞状」生长。",
+ micro:"革兰阳性小杆菌，直或微弯。",
+ biochem:"触酶阳性；25℃ 有动力、37℃ 无动力。",
+ drug:"氨苄西林为首选，可联用庆大霉素。",
+ toxicity:"能穿越血脑屏障与胎盘屏障，引起脑膜脑炎、流产，人畜共患。",
+ disease:"李斯特菌病（脑膜脑炎、败血症、流产）。",
+ treat:"氨苄西林 + 庆大霉素。",
+ diff:"25℃ 动力阳性、37℃ 动力阴性（伞状生长）。",
+ points:["25℃ 有动力、37℃ 无动力","人畜共患","可引起流产"]},
+{name:"猪丹毒丝菌", en:"Erysipelothrix rhusiopathiae", gram:"G+", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"光滑型(S)细小透明菌落，粗糙型(R)较大、边缘不齐。",
+ micro:"革兰阳性纤细长杆菌，多形性，直或微弯。",
+ biochem:"触酶阴性，H₂S 阳性。",
+ drug:"青霉素敏感。",
+ toxicity:"侵入皮肤引起菱形疹块，可致败血症、关节炎。",
+ disease:"猪丹毒（皮肤菱形疹块、败血型、关节炎型）。",
+ treat:"青霉素。",
+ diff:"H₂S 阳性、触酶阴性。",
+ points:["猪丹毒菱形疹块","H₂S 阳性"]},
+{name:"大肠杆菌", en:"Escherichia coli", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"麦康凯平板上呈红色（乳糖发酵）菌落；伊红美蓝(EMB)平板呈紫黑色金属光泽。",
+ micro:"革兰阴性短杆菌，两端钝圆。",
+ biochem:"乳糖发酵阳性、吲哚阳性，IMViC = + + - -。",
+ drug:"常做药敏；常用氨基糖苷类、氟喹诺酮类、头孢类。",
+ toxicity:"内毒素 + 黏附素 + 肠毒素，引起腹泻、败血症。",
+ disease:"仔猪黄痢/白痢、禽大肠杆菌病（败血症、腹膜炎）。",
+ treat:"氨基糖苷类、氟喹诺酮类，注意药敏。",
+ diff:"麦康凯红色菌落、EMB 金属光泽、IMViC + + - -。",
+ points:["麦康凯平板上红色菌落","EMB 紫黑色金属光泽","IMViC = + + - -","仔猪黄白痢"]},
+{name:"沙门氏菌", en:"Salmonella", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"麦康凯平板上呈无色（乳糖不发酵）菌落；SS 平板黑色中心菌落。",
+ micro:"革兰阴性杆菌，多有周身鞭毛。",
+ biochem:"乳糖不发酵、H₂S 阳性、IMViC = - + - +。",
+ drug:"氟喹诺酮类、头孢类；慎用氨基糖苷类（疗效有限）。",
+ toxicity:"内毒素 + 肠毒素，引起肠炎、败血症；人畜共患（食物中毒）。",
+ disease:"猪副伤寒、鸡白痢、禽伤寒、食物中毒。",
+ treat:"氟喹诺酮类、头孢菌素类。",
+ diff:"麦康凯无色(乳糖-)、H₂S 阳性、SS 黑色中心。",
+ points:["麦康凯平板上无色菌落(乳糖-)","H₂S 阳性","鸡白痢病原","人畜共患食物中毒"]},
+{name:"多杀性巴氏杆菌", en:"Pasteurella multocida", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"血琼脂上细小、灰白、不溶血菌落。",
+ micro:"革兰阴性短杆菌，瑞氏/美蓝染色呈两极浓染。",
+ biochem:"氧化酶阳性、触酶阳性、吲哚阳性、乳糖不发酵。",
+ drug:"青霉素、头孢类、氟喹诺酮类敏感。",
+ toxicity:"荚膜抗吞噬，引起出血性败血症。",
+ disease:"禽霍乱、猪肺疫、牛出血性败血症。",
+ treat:"青霉素类、头孢类、氟喹诺酮类。",
+ diff:"两极浓染、吲哚阳性。",
+ points:["两极浓染","禽霍乱病原","猪肺疫病原"]},
+{name:"布鲁氏菌", en:"Brucella", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
+ colony:"细小、圆形、凸起、光滑菌落，初代需 5-10% CO₂。",
+ micro:"革兰阴性小球杆菌，柯兹洛夫斯基染色呈红色。",
+ biochem:"氧化酶阳性、脲酶阳性、需 CO₂。",
+ drug:"多西环素 + 利福平联合治疗（人），动物以扑杀/免疫为主。",
+ toxicity:"细胞内寄生，引起波浪热、流产，人畜共患。",
+ disease:"布氏杆菌病（流产、附睾炎、关节炎）。",
+ treat:"人多西环素 + 利福平；患病畜扑杀净化。",
+ diff:"柯兹洛夫斯基染色、脲酶阳性、需 CO₂。",
+ points:["人畜共患","引起流产","波浪热","柯兹洛夫斯基染色"]},
+{name:"猪胸膜肺炎放线杆菌", en:"Actinobacillus pleuropneumoniae", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"血琼脂上 β 溶血，需 V 因子（NAD）生长。",
+ micro:"革兰阴性小杆菌，两端钝圆。",
+ biochem:"脲酶阳性、需 V 因子。",
+ drug:"头孢噻呋、氟苯尼考、替米考星敏感。",
+ toxicity:"产生 Apx 毒素，引起肺出血性坏死。",
+ disease:"猪传染性胸膜肺炎（急性出血性肺炎）。",
+ treat:"头孢噻呋、氟苯尼考、替米考星。",
+ diff:"β 溶血、需 V 因子。",
+ points:["猪传染性胸膜肺炎病原","需 V 因子(NAD)"]},
+{name:"副猪嗜血杆菌", en:"Haemophilus parasuis", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"与金黄色葡萄球菌共培养呈「卫星现象」。",
+ micro:"革兰阴性小杆菌，多形性。",
+ biochem:"需 V 因子(NAD)，卫星现象阳性。",
+ drug:"头孢类、恩诺沙星敏感。",
+ toxicity:"引起多发性浆膜炎、关节炎。",
+ disease:"格拉泽病（多发性浆膜炎、脑膜炎）。",
+ treat:"头孢类、恩诺沙星。",
+ diff:"NAD 依赖、卫星现象。",
+ points:["卫星现象","格拉泽病病原"]},
+{name:"支气管败血波氏杆菌", en:"Bordetella bronchiseptica", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
+ colony:"麦康凯平板可生长，细小灰白菌落。",
+ micro:"革兰阴性小杆菌。",
+ biochem:"氧化酶阳性、触酶阳性、尿素酶阳性。",
+ drug:"多西环素、氟苯尼考敏感。",
+ toxicity:"产生皮肤坏死毒素(DNT)与黏附素，致呼吸道病变。",
+ disease:"猪萎缩性鼻炎、犬传染性支气管炎（犬窝咳）。",
+ treat:"多西环素、氟苯尼考。",
+ diff:"尿素酶阳性、氧化酶阳性。",
+ points:["猪萎缩性鼻炎病原","犬窝咳病原"]},
+{name:"结核分枝杆菌/牛分枝杆菌", en:"Mycobacterium tuberculosis/bovis", gram:"抗酸", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
+ colony:"罗氏培养基上呈菜花状、粗糙、干燥菌落，生长缓慢（2-8 周）。",
+ micro:"抗酸染色阳性，呈红色细长杆菌。",
+ biochem:"抗酸染色阳性、耐酸、耐碱。",
+ drug:"异烟肼 + 利福平 + 乙胺丁醇等联合（人结核）。",
+ toxicity:"细胞内寄生，引起慢性肉芽肿性病变，人畜共患。",
+ disease:"结核病（牛结核、人肺结核）。",
+ treat:"异烟肼、利福平联合用药。",
+ diff:"抗酸染色阳性、罗氏培养基生长缓慢。",
+ points:["抗酸染色阳性","罗氏培养基","结核菌素试验(迟发型变态反应)"]},
+{name:"钩端螺旋体", en:"Leptospira", gram:"螺旋体", shape:"螺旋体", arrange:"—", spore:"无", oxygen:"需氧",
+ colony:"柯索夫(Korthof)培养基上云雾状生长。",
+ micro:"暗视野显微镜下呈钩状、螺旋状运动，镀银染色呈棕黑色。",
+ biochem:"需血清培养基，氧化酶阳性。",
+ drug:"青霉素、多西环素。",
+ toxicity:"引起黄疸、出血、肾损伤，人畜共患。",
+ disease:"钩端螺旋体病（黄疸出血型）。",
+ treat:"青霉素、多西环素。",
+ diff:"暗视野运动、镀银染色棕黑色。",
+ points:["暗视野检查","镀银染色","人畜共患"]},
+{name:"猪肺炎支原体", en:"Mycoplasma hyopneumoniae", gram:"支原体", shape:"支原体", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"固体培养基上呈「荷包蛋」状菌落，生长需胆固醇。",
+ micro:"无细胞壁，多形性，吉姆萨染色。",
+ biochem:"无细胞壁，对 β-内酰胺类天然耐药。",
+ drug:"泰妙菌素、泰乐菌素、土霉素、氟喹诺酮类。",
+ toxicity:"黏附于呼吸道纤毛，引起慢性肺炎。",
+ disease:"猪气喘病（猪地方流行性肺炎）。",
+ treat:"泰妙菌素、泰乐菌素、土霉素。",
+ diff:"无细胞壁、荷包蛋状菌落、对青霉素天然耐药。",
+ points:["无细胞壁","猪气喘病病原","对 β-内酰胺类天然耐药"]},
+{name:"鸡毒支原体", en:"Mycoplasma gallisepticum", gram:"支原体", shape:"支原体", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"「荷包蛋」状菌落。",
+ micro:"无细胞壁，多形性。",
+ biochem:"需胆固醇生长。",
+ drug:"泰乐菌素、泰妙菌素。",
+ toxicity:"引起鸡慢性呼吸道病、气囊炎。",
+ disease:"鸡慢性呼吸道病（CRD）。",
+ treat:"泰乐菌素、泰妙菌素。",
+ diff:"无细胞壁、荷包蛋状菌落。",
+ points:["鸡慢性呼吸道病病原","无细胞壁"]},
+{name:"铜绿假单胞菌", en:"Pseudomonas aeruginosa", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
+ colony:"产生绿色水溶性色素，有生姜气味。",
+ micro:"革兰阴性杆菌，单个或成对排列。",
+ biochem:"氧化酶阳性、产生绿脓菌素。",
+ drug:"庆大霉素、多粘菌素、哌拉西林等。",
+ toxicity:"条件致病菌，产生多种外毒素，耐药性强。",
+ disease:"创面感染、乳腺炎、呼吸道感染。",
+ treat:"庆大霉素、多粘菌素、喹诺酮类（易耐药，做药敏）。",
+ diff:"绿色色素、生姜味、氧化酶阳性。",
+ points:["绿色水溶性色素","条件致病菌","易产生耐药"]},
+{name:"变形杆菌", en:"Proteus", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+ colony:"血琼脂上呈「迁徙生长」的波纹状菌膜。",
+ micro:"革兰阴性杆菌，多形性。",
+ biochem:"脲酶阳性、苯丙氨酸脱氨酶阳性、H₂S 阳性。",
+ drug:"头孢类、氟喹诺酮类。",
+ toxicity:"条件致病菌，引起尿路感染。",
+ disease:"尿路感染、伤口感染。",
+ treat:"头孢类、氟喹诺酮类。",
+ diff:"迁徙生长、脲酶阳性。",
+ points:["迁徙生长","脲酶阳性"]},
+{name:"空肠弯曲杆菌", en:"Campylobacter jejuni", gram:"G-", shape:"弧菌", arrange:"—", spore:"无", oxygen:"微需氧",
+ colony:"微需氧培养，细小、湿润菌落。",
+ micro:"革兰阴性弯曲菌，呈 S 形、海鸥状。",
+ biochem:"氧化酶阳性、触酶阳性、微需氧。",
+ drug:"大环内酯类(阿奇霉素)、氟喹诺酮类。",
+ toxicity:"产生细胞毒素，引起腹泻，人畜共患。",
+ disease:"弯曲菌肠炎（腹泻）。",
+ treat:"大环内酯类、氟喹诺酮类。",
+ diff:"海鸥状形态、微需氧培养。",
+ points:["海鸥状形态","微需氧","人畜共患腹泻"]}
+];
+
+/* ============================================================
+   数据层：兽药数据库
+   ============================================================ */
+const DRUGS = [
+{name:"青霉素G", cat:"青霉素类", unit:"IU/kg",
+ dose:{牛:[20000,40000],羊:[20000,40000],猪:[20000,40000],犬:[30000,60000],猫:[30000,60000]},
+ withdraw:"猪 7 天、牛 5 天",
+ taboo:"与四环素类、氯霉素、大环内酯类(抑菌剂)拮抗，不宜合用",
+ action:"G⁺菌、螺旋体、放线菌", note:"窄谱，对 G⁻ 杆菌无效"},
+{name:"氨苄西林", cat:"青霉素类", unit:"mg/kg",
+ dose:{牛:[10,20],羊:[10,20],猪:[10,20],犬:[15,25],猫:[15,25]},
+ withdraw:"猪 7 天",
+ taboo:"与抑菌剂拮抗；不宜与碱性药物配伍",
+ action:"广谱，对 G⁻ 也有一定作用", note:"可被 β-内酰胺酶水解"},
+{name:"阿莫西林", cat:"青霉素类", unit:"mg/kg",
+ dose:{牛:[10,15],羊:[10,15],猪:[10,15],犬:[10,20],猫:[10,20]},
+ withdraw:"猪 7 天",
+ taboo:"与抑菌剂拮抗",
+ action:"广谱，口服吸收好", note:"临床常用，耐酸"},
+{name:"头孢噻呋", cat:"头孢菌素类", unit:"mg/kg",
+ dose:{牛:[3,5],羊:[3,5],猪:[3,5],犬:[2.2,4.4],猫:[2.2,4.4]},
+ withdraw:"牛 0 天(注射)、猪 4 天",
+ taboo:"与氨基糖苷类合用有协同，但勿同瓶混合",
+ action:"广谱，对 G⁻ 较强，对产酶菌稳定", note:"动物专用，抗菌谱广"},
+{name:"庆大霉素", cat:"氨基糖苷类", unit:"mg/kg",
+ dose:{牛:[1,2],羊:[1,2],猪:[1,2],犬:[2,4],猫:[2,4]},
+ withdraw:"猪 40 天",
+ taboo:"与呋塞米等利尿剂合用加重耳/肾毒性",
+ action:"G⁻ 杆菌为主", note:"耳毒性、肾毒性，需控制剂量"},
+{name:"恩诺沙星", cat:"氟喹诺酮类", unit:"mg/kg",
+ dose:{牛:[2.5,5],羊:[2.5,5],猪:[2.5,5],犬:[2.5,5],猫:[2.5,5]},
+ withdraw:"猪 10 天、鸡 8 天",
+ taboo:"与含钙、镁、铝制剂螯合；与茶碱合用增毒",
+ action:"广谱，组织穿透好", note:"幼龄动物可致软骨损伤"},
+{name:"土霉素", cat:"四环素类", unit:"mg/kg",
+ dose:{牛:[10,20],羊:[10,20],猪:[10,20],犬:[10,20],猫:[10,20]},
+ withdraw:"牛 28 天、猪 28 天",
+ taboo:"与钙、铁等金属离子螯合，影响吸收",
+ action:"广谱抑菌，抗支原体", note:"休药期长"},
+{name:"多西环素", cat:"四环素类", unit:"mg/kg",
+ dose:{牛:[5,10],羊:[5,10],猪:[5,10],犬:[5,10],猫:[5,10]},
+ withdraw:"猪 28 天",
+ taboo:"与金属离子螯合",
+ action:"广谱，抗支原体、立克次体", note:"脂溶性好"},
+{name:"磺胺嘧啶", cat:"磺胺类", unit:"mg/kg",
+ dose:{牛:[50,100],羊:[50,100],猪:[50,100],犬:[25,50],猫:[25,50]},
+ withdraw:"猪 10 天",
+ taboo:"与普鲁卡因拮抗；与碳酸氢钠同服防结晶尿",
+ action:"广谱抑菌", note:"首剂加倍"},
+{name:"伊维菌素", cat:"抗寄生虫(大环内酯)", unit:"mg/kg",
+ dose:{牛:[0.2,0.2],羊:[0.2,0.2],猪:[0.3,0.3],犬:[0.2,0.4],猫:[0.2,0.4]},
+ withdraw:"猪 28 天、牛 35 天",
+ taboo:"柯利犬系犬种禁用(血脑屏障敏感)",
+ action:"抗线虫、外寄生虫(螨、虱)", note:"注射/口服/浇泼"},
+{name:"阿苯达唑", cat:"抗寄生虫(苯并咪唑)", unit:"mg/kg",
+ dose:{牛:[5,10],羊:[5,10],猪:[10,15],犬:[10,15],猫:[10,15]},
+ withdraw:"牛 14 天、羊 14 天",
+ taboo:"妊娠早期慎用(致畸)",
+ action:"抗线虫、绦虫、吸虫", note:"广谱驱虫"},
+{name:"吡喹酮", cat:"抗寄生虫(抗吸虫绦虫)", unit:"mg/kg",
+ dose:{牛:[5,10],羊:[5,10],猪:[5,10],犬:[5,10],猫:[5,10]},
+ withdraw:"猪 7 天",
+ taboo:"暂无显著配伍禁忌",
+ action:"抗吸虫、绦虫", note:"对吸虫、绦虫高效"},
+{name:"左旋咪唑", cat:"抗寄生虫(抗线虫)", unit:"mg/kg",
+ dose:{牛:[7.5,7.5],羊:[7.5,7.5],猪:[7.5,7.5],犬:[10,10],猫:[10,10]},
+ withdraw:"猪 7 天",
+ taboo:"与有机磷类驱虫药合用增毒",
+ action:"抗线虫", note:"兼有免疫增强作用"},
+{name:"地塞米松", cat:"糖皮质激素", unit:"mg/kg",
+ dose:{牛:[0.02,0.1],羊:[0.02,0.1],猪:[0.02,0.1],犬:[0.05,0.1],猫:[0.05,0.1]},
+ withdraw:"牛 2 天",
+ taboo:"孕期禁用；与疫苗同用影响免疫应答",
+ action:"抗炎、抗过敏", note:"感染性疾病需配合抗生素"},
+{name:"氟尼辛葡甲胺", cat:"非甾体抗炎药", unit:"mg/kg",
+ dose:{牛:[1.1,2.2],羊:[1.1,2.2],猪:[1.1,2.2],犬:[1,2],猫:[0.5,1]},
+ withdraw:"猪 4 天",
+ taboo:"勿与其他 NSAID 或激素类合用",
+ action:"解热、镇痛、抗炎", note:"注意胃肠与肾损伤"},
+{name:"阿托品", cat:"抗胆碱药", unit:"mg/kg",
+ dose:{牛:[0.05,0.1],羊:[0.05,0.1],猪:[0.05,0.1],犬:[0.02,0.05],猫:[0.02,0.05]},
+ withdraw:"无明确休药期(急救用)",
+ taboo:"与有机磷中毒时禁用解磷定以外的拟胆碱药",
+ action:"解有机磷中毒、抑制腺体分泌", note:"急救用药"}
+];
+
+/* ============================================================
+   数据层：习题库
+   ============================================================ */
+const QUESTIONS = [
+{q:"金黄色葡萄球菌与链球菌鉴别最常用的试验是？", opts:["触酶试验","CAMP 试验","氧化酶试验","凝固酶试验"], ans:0, exp:"触酶试验：葡萄球菌阳性、链球菌阴性，是最常用的鉴别试验。凝固酶试验则用于区分致病性葡萄球菌。"},
+{q:"在麦康凯平板上形成红色菌落的革兰阴性杆菌是？", opts:["沙门氏菌","大肠杆菌","变形杆菌","巴氏杆菌"], ans:1, exp:"大肠杆菌发酵乳糖，在麦康凯平板上形成红色菌落；沙门氏菌不发酵乳糖，呈无色菌落。"},
+{q:"炭疽芽孢杆菌在固体培养基上的典型菌落形态是？", opts:["光滑圆形","卷发状","荷包蛋状","迁徙生长"], ans:1, exp:"炭疽芽孢杆菌呈灰白、粗糙、边缘不齐的卷发状(R 型)菌落。"},
+{q:"破伤风梭菌的芽孢位于菌体何位置？", opts:["中央","近端","末端鼓槌状","随机"], ans:2, exp:"破伤风梭菌芽孢位于末端，呈鼓槌状，是重要鉴定特征。"},
+{q:"CAMP 试验阳性的链球菌是？", opts:["猪链球菌","无乳链球菌","马链球菌","肺炎链球菌"], ans:1, exp:"无乳链球菌 CAMP 试验阳性、马尿酸水解阳性，是奶牛乳腺炎主要病原。"},
+{q:"抗酸染色用于鉴定下列哪种细菌？", opts:["大肠杆菌","结核分枝杆菌","沙门氏菌","布鲁氏菌"], ans:1, exp:"结核分枝杆菌抗酸染色阳性，呈红色细长杆菌。"},
+{q:"支原体与细菌的重要区别是？", opts:["有细胞壁","无细胞壁","有芽孢","革兰阳性"], ans:1, exp:"支原体无细胞壁，呈多形性，对 β-内酰胺类抗生素天然耐药。"},
+{q:"LD₅₀ 的含义是？", opts:["全部动物死亡剂量","引起 50% 动物死亡的剂量","最小有效剂量","最大耐受剂量"], ans:1, exp:"LD₅₀(半数致死量)指引起一组动物 50% 死亡的药物或毒物剂量，是毒力评价的重要指标。"},
+{q:"Reed-Muench 法主要用于计算？", opts:["ED₅₀","LD₅₀","MIC","休药期"], ans:1, exp:"Reed-Muench 法是计算半数致死量(LD₅₀)的经典累加法。"},
+{q:"猪丹毒的病原是？", opts:["猪链球菌","猪丹毒丝菌","巴氏杆菌","大肠杆菌"], ans:1, exp:"猪丹毒丝菌(Erysipelothrix rhusiopathiae)引起猪丹毒，特征为皮肤菱形疹块。"},
+{q:"青霉素不宜与下列哪类药合用？", opts:["氨基糖苷类","四环素类(抑菌剂)","头孢类","磺胺类"], ans:1, exp:"青霉素为繁殖期杀菌剂，与四环素等快速抑菌剂合用会产生拮抗作用。"},
+{q:"恩诺沙星对幼龄动物的主要不良反应是？", opts:["耳毒性","软骨损伤","出血","贫血"], ans:1, exp:"氟喹诺酮类可致幼龄动物关节软骨损伤，故幼龄动物慎用。"},
+{q:"伊维菌素主要用于驱除？", opts:["吸虫","绦虫","线虫与外寄生虫","球虫"], ans:2, exp:"伊维菌素属大环内酯类抗寄生虫药，主要用于线虫和外寄生虫(螨、虱等)。"},
+{q:"休药期的定义是？", opts:["用药到痊愈的时间","最后一次用药到上市屠宰的最小间隔","首次用药到停药时间","药物在体内半衰期"], ans:1, exp:"休药期指最后一次给药至动物产品(肉、奶、蛋)上市允许屠宰/销售的最小间隔时间。"},
+{q:"犬窝咳(犬传染性支气管炎)的主要病原之一是？", opts:["支气管败血波氏杆菌","沙门氏菌","布鲁氏菌","炭疽杆菌"], ans:0, exp:"支气管败血波氏杆菌是犬窝咳和猪萎缩性鼻炎的病原之一。"},
+{q:"布鲁氏菌病最重要的公共卫生意义是？", opts:["引起腹泻","人畜共患并致流产","呼吸道传播","仅感染猪"], ans:1, exp:"布鲁氏菌病是人畜共患病，主要引起流产、附睾炎，人感染表现为波浪热。"}
+];
+
+/* ============================================================
+   通用工具
+   ============================================================ */
+function $(id){return document.getElementById(id)}
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),1800)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function go(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  $('panel-'+tab).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============================================================
+   模块1：病原检索
+   ============================================================ */
+function gramTag(g){
+  const m={'G+':'g1','G-':'g2','抗酸':'w','支原体':'w','螺旋体':'g2'};
+  return '<span class="tag '+ (m[g]||'') +'">'+esc(g)+'</span>';
+}
+function bacteriaCard(b){
+  return `<div class="bcard">
+    <div class="bh">
+      <div><div class="bn">${esc(b.name)}</div><div class="be">${esc(b.en)}</div></div>
+      ${gramTag(b.gram)}
+    </div>
+    <div class="tags">
+      <span class="tag">${esc(b.shape)}</span>
+      ${b.arrange!=='—'?'<span class="tag">'+esc(b.arrange)+'排列</span>':''}
+      <span class="tag">${esc(b.oxygen==='兼性'?'兼性厌氧':b.oxygen==='需氧'?'专性需氧':b.oxygen==='厌氧'?'专性厌氧':'微需氧')}</span>
+      <span class="tag">${b.spore==='有'?'有芽孢':'无芽孢'}</span>
+    </div>
+    <div class="bfoot">
+      <button class="btn line sm" onclick="showDetail('${b.name}')">查看完整资料 →</button>
+      <span class="small muted">${esc(b.disease)}</span>
+    </div>
+  </div>`;
+}
+function renderBacteriaList(arr, mountId, emptyText){
+  const m=$(mountId);
+  if(!arr.length){m.innerHTML=`<div class="empty"><div class="ei">🔬</div>${emptyText||'未找到匹配菌种，请调整条件'}</div>`;return}
+  m.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">`+
+    arr.map(bacteriaCard).join('')+`</div>`;
+}
+function renderAllBacteria(){renderBacteriaList(BACTERIA,'searchResults','');$('searchInput').value='';$('detailMount').innerHTML=''}
+
+function doSearch(){
+  const q=$('searchInput').value.trim();
+  if(!q){toast('请输入检索关键词');return}
+  const kw=q.toLowerCase();
+  const res=BACTERIA.filter(b=>{
+    return b.name.includes(q)||b.en.toLowerCase().includes(kw)||b.disease.includes(q)||b.treat.includes(q)||
+           b.diff.includes(q)||b.colony.includes(q)||b.micro.includes(q)||b.biochem.includes(q)||
+           b.points.some(p=>p.includes(q));
+  });
+  renderBacteriaList(res,'searchResults',`未找到与「${esc(q)}」相关的菌种`);
+  $('detailMount').innerHTML='';
+}
+
+function showDetail(name){
+  const b=BACTERIA.find(x=>x.name===name);
+  if(!b)return;
+  $('detailMount').innerHTML=`
+  <div class="card">
+    <div class="spread">
+      <h2><span class="bar"></span>${esc(b.name)} <span class="muted small" style="font-weight:400">${esc(b.en)}</span></h2>
+      <button class="btn ghost sm" onclick="$('detailMount').innerHTML='';$('panel-pathogen').scrollIntoView({behavior:'smooth'})">关闭</button>
+    </div>
+    <div class="tags mt8">${gramTag(b.gram)}
+      <span class="tag">${esc(b.shape)}</span>
+      ${b.arrange!=='—'?'<span class="tag">'+esc(b.arrange)+'排列</span>':''}
+      <span class="tag">${esc(b.oxygen==='兼性'?'兼性厌氧':b.oxygen==='需氧'?'专性需氧':b.oxygen==='厌氧'?'专性厌氧':'微需氧')}</span>
+      <span class="tag">${b.spore==='有'?'有芽孢':'无芽孢'}</span>
+    </div>
+    <div class="detail-grid mt12">
+      <div class="dcell"><div class="dk">🧫 菌落特征</div><div class="dv">${esc(b.colony)}</div></div>
+      <div class="dcell"><div class="dk">🔬 镜下形态</div><div class="dv">${esc(b.micro)}</div></div>
+      <div class="dcell"><div class="dk">🧪 生化鉴定</div><div class="dv">${esc(b.biochem)}</div></div>
+      <div class="dcell"><div class="dk">💊 药敏判读</div><div class="dv">${esc(b.drug)}</div></div>
+      <div class="dcell"><div class="dk">☠️ 毒性/致病性</div><div class="dv">${esc(b.toxicity)}</div></div>
+      <div class="dcell"><div class="dk">🏥 所致疾病</div><div class="dv">${esc(b.disease)}</div></div>
+      <div class="dcell full"><div class="dk">⚕️ 治疗用药</div><div class="dv">${esc(b.treat)}</div></div>
+      <div class="dcell full"><div class="dk">🔎 鉴别要点</div><div class="dv">${esc(b.diff)}</div></div>
+      <div class="dcell full"><div class="dk">📚 常考知识点</div><div class="dv"><ul style="padding-left:18px">${b.points.map(p=>'<li>'+esc(p)+'</li>').join('')}</ul></div></div>
+    </div>
+  </div>`;
+  $('detailMount').scrollIntoView({behavior:'smooth'});
+}
+
+/* ---- 特征筛选 ---- */
+const FILTER_DEFS=[
+  {key:'gram', label:'革兰染色', options:['G+','G-','抗酸','支原体','螺旋体']},
+  {key:'shape', label:'镜下形态', options:['球菌','杆菌','弧菌','螺旋体','支原体']},
+  {key:'arrange', label:'球菌排列', options:['葡萄串','链状']},
+  {key:'spore', label:'芽孢(杆菌)', options:['有','无']},
+  {key:'oxygen', label:'氧需求', options:['需氧','厌氧','兼性','微需氧']}
+];
+let filters={};
+function buildFilters(){
+  $('filterBox').innerHTML=FILTER_DEFS.map(f=>{
+    return `<div style="margin-bottom:14px"><label class="f">${f.label}</label>
+      <div class="chips">${f.options.map(o=>`<button class="chip ${filters[f.key]===o?'on':''}" onclick="toggleFilter('${f.key}','${o}')">${o}</button>`).join('')}</div></div>`;
+  }).join('');
+  applyFilters();
+}
+function toggleFilter(k,v){
+  if(filters[k]===v)filters[k]=null; else filters[k]=v;
+  buildFilters();
+}
+function clearFilters(){filters={};buildFilters()}
+function applyFilters(){
+  let res=BACTERIA.filter(b=>{
+    for(const k in filters){const v=filters[k];if(!v)continue;
+      if(k==='arrange' && b.shape!=='球菌')return false;
+      if(b[k]!==v)return false;
+    }
+    return true;
+  });
+  $('filterCount').textContent=`共 ${res.length} 种菌种符合`;
+  renderBacteriaList(res,'filterResults','');
+}
+
+/* ---- 特征向导 ---- */
+const WIZ_STEPS=[
+  {key:'gram', q:'第一步：革兰染色结果是？', options:[
+    {v:'G+', label:'革兰阳性 (G⁺)', d:'染成紫色'},
+    {v:'G-', label:'革兰阴性 (G⁻)', d:'染成红色'},
+    {v:'抗酸', label:'抗酸染色阳性', d:'红色，抗酸菌'},
+    {v:'支原体', label:'无细胞壁(支原体)', d:'吉姆萨染色，多形性'},
+    {v:'螺旋体', label:'螺旋体', d:'暗视野见螺旋运动'}]},
+  {key:'shape', q:'第二步：镜下形态是？', options:[
+    {v:'球菌', label:'球菌', d:'圆形或近圆形'},
+    {v:'杆菌', label:'杆菌', d:'杆状'},
+    {v:'弧菌', label:'弧菌/弯曲菌', d:'弧形或海鸥状'},
+    {v:'螺旋体', label:'螺旋体', d:'螺旋形'},
+    {v:'支原体', label:'支原体', d:'无细胞壁多形性'}]},
+  {key:'arrange', q:'第三步：球菌的排列方式？', cond:(s)=>s.shape==='球菌', options:[
+    {v:'葡萄串', label:'葡萄串状', d:'成堆聚集'},
+    {v:'链状', label:'链状', d:'连成链'}]},
+  {key:'spore', q:'第三步：杆菌是否形成芽孢？', cond:(s)=>s.shape==='杆菌', options:[
+    {v:'有', label:'有芽孢', d:'可见芽孢'},
+    {v:'无', label:'无芽孢', d:'无芽孢'}]},
+  {key:'oxygen', q:'第四步：氧需求类型？', options:[
+    {v:'需氧', label:'专性需氧', d:'必须有氧'},
+    {v:'厌氧', label:'专性厌氧', d:'厌氧环境生长'},
+    {v:'兼性', label:'兼性厌氧', d:'有氧无氧均可'},
+    {v:'微需氧', label:'微需氧', d:'低氧浓度生长'}]}
+];
+let wizState={}, wizIdx=0;
+function startWizard(){wizState={};wizIdx=0;renderWizard()}
+function resetWizard(){wizState={};wizIdx=0;$('wizardBox').innerHTML=''}
+function renderWizard(){
+  const box=$('wizardBox');
+  // 找出下一步（跳过不满足条件的问题）
+  while(wizIdx<WIZ_STEPS.length){
+    const s=WIZ_STEPS[wizIdx];
+    if(s.cond && !s.cond(wizState)){wizIdx++;continue}
+    break;
+  }
+  if(wizIdx>=WIZ_STEPS.length){showWizardResult();return}
+  const s=WIZ_STEPS[wizIdx];
+  const activeKeys=Object.keys(wizState);
+  const remaining=filterByWiz();
+  box.innerHTML=`
+    <div class="wiz">
+      <div class="wiz-step">${WIZ_STEPS.map((st,i)=>{
+        let cls='dot';
+        if(i<wizIdx)cls='dot done';
+        else if(i===wizIdx)cls='dot on';
+        return `<div class="${cls}">${i+1}</div>${i<WIZ_STEPS.length-1?`<div class="wiz-line ${i<wizIdx?'on':''}"></div>`:''}`;
+      }).join('')}
+      </div>
+      <div class="wiz-q">${s.q}</div>
+      <div class="wiz-count">当前符合条件候选菌种：<b style="color:var(--primary)">${remaining.length}</b> 种</div>
+      <div class="optlist">${s.options.map(o=>`
+        <button class="opt" onclick="wizChoose('${s.key}','${o.v}')">
+          <span class="oico">${iconFor(o.v)}</span>
+          <span><span style="display:block">${esc(o.label)}</span><span class="small muted">${esc(o.d)}</span></span>
+        </button>`).join('')}
+      </div>
+      ${activeKeys.length?`<div class="mt12"><button class="btn ghost sm" onclick="wizBack()">← 上一步</button></div>`:''}
+    </div>`;
+}
+function iconFor(v){
+  const m={'G+':'＋','G-':'－','抗酸':'抗','支原体':'∅','螺旋体':'〜','球菌':'●','杆菌':'▭','弧菌':'⌒','葡萄串':'♧','链状':'⌁','有':'有','无':'无','需氧':'O₂','厌氧':'✕','兼性':'±','微需氧':'½'};
+  return m[v]||'?';
+}
+function filterByWiz(){
+  return BACTERIA.filter(b=>{
+    for(const k in wizState){const v=wizState[k];if(!v)continue;
+      if(k==='arrange' && b.shape!=='球菌')return false;
+      if(k==='spore' && b.shape!=='杆菌')return false;
+      if(b[k]!==v)return false;
+    }
+    return true;
+  });
+}
+function wizChoose(k,v){
+  wizState[k]=v; wizIdx++;
+  // 判断是否已经可以出结果
+  const done = WIZ_STEPS.every(s=> (s.cond&&!s.cond(wizState)) || wizState[s.key]);
+  renderWizard();
+}
+function wizBack(){wizIdx=Math.max(0,wizIdx-1);delete wizState[WIZ_STEPS[wizIdx]?.key];renderWizard()}
+function showWizardResult(){
+  const res=filterByWiz();
+  const box=$('wizardBox');
+  let inner='';
+  if(res.length===1){
+    inner=`<div class="result-box"><div class="flex"><span class="badge g">鉴定完成</span><span style="font-size:15px;font-weight:700">最可能菌种：${esc(res[0].name)}（${esc(res[0].en)}）</span></div></div>`;
+  }else if(res.length>1){
+    inner=`<div class="result-box"><span class="badge y">候选菌种 ${res.length} 种</span> 请结合下方鉴别要点进一步区分</div>`;
+  }else{
+    inner=`<div class="result-box"><span class="badge r">无匹配</span> 请返回调整特征，或使用「关键词检索」</div>`;
+  }
+  box.innerHTML=`<div class="wiz">${inner}<div class="mt12">${res.length?res.map(bacteriaCard).join(''):''}</div>
+    <div class="mt12 flex"><button class="btn ghost sm" onclick="startWizard()">重新鉴定</button></div></div>`;
+}
+
+/* ============================================================
+   模块2：科研工具包
+   ============================================================ */
+let groups=[];
+function addGroup(){
+  groups.push({dose:'', n:10, dead:0});
+  renderGroups();
+}
+function clearGroups(){groups=[];renderGroups();$('ld50Result').innerHTML=''}
+function loadExample(){
+  groups=[{dose:1,n:10,dead:0},{dose:2,n:10,dead:2},{dose:4,n:10,dead:4},{dose:8,n:10,dead:8},{dose:16,n:10,dead:10}];
+  renderGroups();calcLD50();
+}
+function renderGroups(){
+  $('groupBox').innerHTML=groups.map((g,i)=>`
+    <div class="ld-in">
+      <span class="small muted" style="width:14px">${i+1}</span>
+      <label class="small">剂量</label><input class="in" type="number" step="any" value="${g.dose}" onchange="groups[${i}].dose=parseFloat(this.value)||''">
+      <label class="small">动物数</label><input class="in" type="number" min="1" value="${g.n}" onchange="groups[${i}].n=parseInt(this.value)||0">
+      <label class="small">死亡数</label><input class="in" type="number" min="0" value="${g.dead}" onchange="groups[${i}].dead=parseInt(this.value)||0">
+      <button class="btn line sm danger" onclick="groups.splice(${i},1);renderGroups()">删</button>
+    </div>`).join('');
+}
+function calcLD50(){
+  const g=groups.map(x=>({dose:+x.dose, n:+x.n, dead:+x.dead}))
+    .filter(x=>x.dose>0 && x.n>0)
+    .sort((a,b)=>a.dose-b.dose);
+  if(g.length<2){$('ld50Result').innerHTML=`<div class="empty">请至少录入 2 个有效剂量组</div>`;return}
+  // Reed-Muench
+  const cumDead=[]; let c=0;
+  for(let i=0;i<g.length;i++){c+=g[i].dead; cumDead.push(c)}
+  const cumSurv=[]; let s=0;
+  for(let i=g.length-1;i>=0;i--){s+=(g[i].n-g[i].dead); cumSurv[i]=s}
+  const mort=g.map((x,i)=>{const d=cumDead[i],sv=cumSurv[i];return d/(d+sv)*100});
+  // 找跨50%区间
+  let lower=-1, upper=-1;
+  for(let i=0;i<g.length-1;i++){
+    if(mort[i]<50 && mort[i+1]>=50){lower=i;upper=i+1;break}
+  }
+  let ld50=null, detail='';
+  if(lower>=0){
+    const ratioDist=(50-mort[lower])/(mort[upper]-mort[lower]);
+    const logLd=Math.log10(g[lower].dose)+ratioDist*(Math.log10(g[upper].dose)-Math.log10(g[lower].dose));
+    ld50=Math.pow(10,logLd);
+    detail=`比例距离 = (50 - ${mort[lower].toFixed(2)}) / (${mort[upper].toFixed(2)} - ${mort[lower].toFixed(2)}) = ${ratioDist.toFixed(4)}\n`+
+           `log LD₅₀ = log(${g[lower].dose}) + ${ratioDist.toFixed(4)} × [log(${g[upper].dose}) - log(${g[lower].dose})] = ${logLd.toFixed(4)}\n`+
+           `LD₅₀ = 10^${logLd.toFixed(4)} ≈ ${ld50.toFixed(3)}`;
+  } else if(mort.some(m=>m===50)){
+    const idx=mort.indexOf(50); ld50=g[idx].dose; detail=`存在恰好 50% 死亡率的剂量组，LD₅₀ = ${ld50}`;
+  } else {
+    ld50=null; detail='数据未跨越 50% 死亡率，无法用 Reed-Muench 法计算，请调整剂量梯度。';
+  }
+  // Karber
+  let karber=null;
+  const ratio=g.length>1?g[1].dose/g[0].dose:1;
+  if(ratio>1 && g.every((x,i)=>i===0||Math.abs(g[i].dose/g[i-1].dose-ratio)<1e-6)){
+    const sumP=g.reduce((a,x)=>a+(x.dead/x.n),0);
+    const Xk=Math.log10(g[g.length-1].dose);
+    const dd=Math.log10(ratio);
+    karber=Math.pow(10, Xk-dd*(sumP-0.5));
+  }
+  const rows=g.map((x,i)=>`
+    <tr><td>${x.dose}</td><td>${x.n}</td><td>${x.dead}</td><td>${x.n-x.dead}</td>
+    <td>${cumDead[i]}</td><td>${cumSurv[i]}</td><td>${mort[i].toFixed(2)}%</td></tr>`).join('');
+  $('ld50Result').innerHTML=`
+    <div class="result-box">
+      <div class="spread">
+        <div><div class="small muted">半数致死量 LD₅₀ (Reed-Muench)</div><div class="big">${ld50!=null?ld50.toFixed(3)+' mg/kg':'—'}</div></div>
+        ${karber!=null?`<div><div class="small muted">Kärber 法对照</div><div class="big" style="font-size:20px;color:var(--muted)">${karber.toFixed(3)} mg/kg</div></div>`:''}
+      </div>
+      <div class="calc-step">${esc(detail)}</div>
+    </div>
+    <div class="tablewrap mt12">
+      <table class="tb">
+        <thead><tr><th>剂量</th><th>动物数</th><th>死亡</th><th>存活</th><th>累计死亡</th><th>累计存活</th><th>死亡率</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+/* ---- 攻毒实验流程 ---- */
+function renderFlow(){
+  const steps=[
+    ["菌液制备","复苏目标菌株，接种平板培养后挑取单菌落，摇菌至对数生长期，离心洗涤后用无菌 PBS 调整至目标浓度(如 10⁸ CFU/mL)，倍比稀释制备剂量梯度。"],
+    ["动物分组","选用 6-8 周龄 BALB/c 小鼠，雌雄各半，随机分组，每组 5-10 只，设攻毒组与 PBS 对照组，记录体重。"],
+    ["攻毒给药","按剂量梯度腹腔注射(0.1-0.2 mL)或灌胃/皮下注射，记录每只动物实际剂量，操作注意生物安全。"],
+    ["观察记录","攻毒后 24、48、72 小时及连续观察 7-14 天，记录死亡数、发病时间、临床症状(竖毛、弓背、精神沉郁)、体重变化。"],
+    ["尸检取材","死亡小鼠及时尸检，观察病变，采集肝、脾、肺等组织，一半做细菌再分离鉴定，一半固定做病理切片。"],
+    ["LD₅₀ 计算","汇总各剂量组死亡数，用本工具 Reed-Muench 法计算半数致死量，评价菌株毒力并撰写实验记录。"],
+    ["结果分析","结合 LD₅₀、细菌载量、病理结果综合判定致病性；对照与重复组保证数据可靠性，遵守动物伦理。"]
+  ];
+  $('flowBox').innerHTML=steps.map((s,i)=>`
+    <div class="flow-step"><div class="fs-n">${i+1}</div><div class="fs-t"><b>${s[0]}</b><span>${s[1]}</span></div></div>`).join('');
+}
+
+function downloadTemplate(){
+  const t=[
+    '================ 动物攻毒实验记录模板 ================',
+    '实验名称：________________________  编号：________',
+    '实验日期：________  地点：________  记录人：________',
+    '',
+    '一、实验动物',
+    '  品系/等级：__________  性别：____  体重范围：______',
+    '  数量：____  分组：____  来源/合格证号：__________',
+    '',
+    '二、菌株与攻毒',
+    '  菌种/菌株号：__________  培养条件：__________',
+    '  攻毒浓度：________ CFU/mL   攻毒途径：□腹腔 □皮下 □灌胃 □其他',
+    '  剂量梯度：____________________________________',
+    '',
+    '三、观察记录表',
+    '  组别 | 剂量 | 动物数 | 24h死亡 | 48h死亡 | 72h死亡 | 累计死亡 | 存活',
+    '  -------------------------------------------------------',
+    '  1    |      |        |         |         |         |          |',
+    '  2    |      |        |         |         |         |          |',
+    '  3    |      |        |         |         |         |          |',
+    '  4    |      |        |         |         |         |          |',
+    '  5    |      |        |         |         |         |          |',
+    '',
+    '四、临床症状与尸检',
+    '  症状：____________________________________',
+    '  病变：____________________________________',
+    '  细菌再分离：□阳性 □阴性  结果：__________',
+    '',
+    '五、LD₅₀ 计算',
+    '  计算方法：Reed-Muench   结果：__________ mg/kg',
+    '',
+    '六、结论与备注',
+    '  ______________________________________________',
+    '================================================'
+  ].join('\r\n');
+  downloadText('攻毒实验记录模板.txt', t);
+}
+function downloadLD50Report(){
+  const g=groups.map(x=>({dose:+x.dose,n:+x.n,dead:+x.dead})).filter(x=>x.dose>0&&x.n>0).sort((a,b)=>a.dose-b.dose);
+  if(g.length<2){toast('请先录入数据并计算');return}
+  const lines=['动物攻毒 LD₅₀ 计算报告','生成时间：'+new Date().toLocaleString(),'','剂量\t动物数\t死亡数\t存活数'];
+  let c=0,s=0;const cumSurv=[];
+  for(let i=g.length-1;i>=0;i--){s+=(g[i].n-g[i].dead);cumSurv[i]=s}
+  g.forEach((x,i)=>{c+=x.dead;const sv=cumSurv[i];lines.push(`${x.dose}\t${x.n}\t${x.dead}\t${x.n-x.dead}\t累计死亡${c}\t累计存活${sv}\t死亡率${(c/(c+sv)*100).toFixed(2)}%`)});
+  // recalc
+  const cd=[];let cc=0;g.forEach(x=>{cc+=x.dead;cd.push(cc)});
+  const cs=[];let ss=0;for(let i=g.length-1;i>=0;i--){ss+=(g[i].n-g[i].dead);cs[i]=ss}
+  const mort=g.map((x,i)=>cd[i]/(cd[i]+cs[i])*100);
+  let lower=-1;for(let i=0;i<g.length-1;i++)if(mort[i]<50&&mort[i+1]>=50){lower=i;break}
+  if(lower>=0){
+    const rd=(50-mort[lower])/(mort[lower+1]-mort[lower]);
+    const logLd=Math.log10(g[lower].dose)+rd*(Math.log10(g[lower+1].dose)-Math.log10(g[lower].dose));
+    lines.push('','LD₅₀ = '+Math.pow(10,logLd).toFixed(3)+' mg/kg (Reed-Muench 法)');
+  }
+  downloadText('LD50计算报告.txt', lines.join('\r\n'));
+}
+function downloadText(name, content){
+  const blob=new Blob(['\ufeff'+content],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  URL.revokeObjectURL(a.href);toast('已下载：'+name);
+}
+
+/* ============================================================
+   模块3：药理速算
+   ============================================================ */
+function initDrugSelect(){
+  $('drugSel').innerHTML=DRUGS.map((d,i)=>`<option value="${i}">${d.name}（${d.cat}）</option>`).join('');
+  calcDrug();
+}
+function calcDrug(){
+  const d=DRUGS[+$('drugSel').value];
+  const sp=$('species').value;
+  const w=parseFloat($('weight').value);
+  if(!d)return;
+  if(!w||w<=0){$('drugResult').innerHTML='<div class="small muted">请输入有效体重</div>';return}
+  const [min,max]=d.dose[sp];
+  const lo=min*w, hi=max*w;
+  const unit=d.unit;
+  $('drugResult').innerHTML=`
+    <div class="result-box">
+      <div class="spread">
+        <div>
+          <div class="small muted">${esc(sp)} · ${esc(d.name)} · 体重 ${w} kg</div>
+          <div style="font-size:24px;font-weight:800;color:var(--primary)">${fmtDose(lo)} ~ ${fmtDose(hi)} ${unit}</div>
+          <div class="small muted">单次给药剂量（按 ${min}~${max} ${unit} 计算）</div>
+        </div>
+        <span class="badge b">${esc(d.cat)}</span>
+      </div>
+      <div class="detail-grid mt12" style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
+        <div class="dcell"><div class="dk">🎯 主要作用</div><div class="dv">${esc(d.action)}</div></div>
+        <div class="dcell"><div class="dk">⏱ 休药期</div><div class="dv">${esc(d.withdraw)}</div></div>
+        <div class="dcell full"><div class="dk">⚠️ 配伍禁忌</div><div class="dv" style="color:#b3261e">${esc(d.taboo)}</div></div>
+        <div class="dcell full"><div class="dk">📝 备注</div><div class="dv">${esc(d.note)}</div></div>
+      </div>
+    </div>`;
+}
+function fmtDose(v){return v>=1000?Math.round(v).toLocaleString():v.toFixed(v<1?2:1).replace(/\.0+$/,'')}
+
+/* ============================================================
+   模块4：刷题练习
+   ============================================================ */
+let quizIdx=0, quizScore=0, quizAnswered=false, quizOrder=[];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function startQuiz(){
+  quizOrder=shuffle(QUESTIONS.map((_,i)=>i));
+  quizIdx=0;quizScore=0;quizAnswered=false;
+  $('wrongCard').style.display='none';
+  renderQuiz();
+}
+function renderQuiz(){
+  if(quizIdx>=quizOrder.length){
+    $('quizBox').innerHTML=`
+      <div class="result-box">
+        <div class="big">${quizScore} / ${quizOrder.length}</div>
+        <div class="muted">正确率 ${Math.round(quizScore/quizOrder.length*100)}%</div>
+        <div class="mt12"><button class="btn" onclick="startQuiz()">再刷一轮</button>
+        <button class="btn ghost" onclick="showWrong()">查看错题本</button></div>
+      </div>`;
+    $('quizProgress').textContent=`已完成 ${quizOrder.length} 题`;
+    return;
+  }
+  const q=QUESTIONS[quizOrder[quizIdx]];
+  quizAnswered=false;
+  $('quizProgress').textContent=`第 ${quizIdx+1} / ${quizOrder.length} 题 · 得分 ${quizScore}`;
+  $('quizBox').innerHTML=`
+    <div class="quiz-q"><span class="no">${quizIdx+1}.</span>${esc(q.q)}</div>
+    <div id="quizOpts">${q.opts.map((o,i)=>`<button class="qopt" onclick="answerQuiz(${i})"><span style="display:inline-block;width:20px;color:var(--primary);font-weight:700">${'ABCD'[i]}.</span>${esc(o)}</button>`).join('')}</div>
+    <div id="quizExplain"></div>`;
+}
+function answerQuiz(i){
+  if(quizAnswered)return;
+  quizAnswered=true;
+  const q=QUESTIONS[quizOrder[quizIdx]];
+  const btns=$('quizOpts').children;
+  btns[i].classList.add(i===q.ans?'correct':'wrong');
+  if(i!==q.ans)btns[q.ans].classList.add('correct');
+  if(i===q.ans){quizScore++}
+  else{addWrong(quizOrder[quizIdx])}
+  $('quizExplain').innerHTML=`<div class="explain"><b>解析：</b>${esc(q.exp)}</div>
+    <div class="mt12 flex"><button class="btn" onclick="nextQuiz()">${quizIdx+1>=quizOrder.length?'查看成绩':'下一题 →'}</button></div>`;
+  $('quizProgress').textContent=`第 ${quizIdx+1} / ${quizOrder.length} 题 · 得分 ${quizScore}`;
+}
+function nextQuiz(){quizIdx++;renderQuiz()}
+
+/* 错题本 */
+function getWrong(){try{return JSON.parse(localStorage.getItem('microid_wrong')||'[]')}catch(e){return[]}}
+function setWrong(w){localStorage.setItem('microid_wrong',JSON.stringify(w))}
+function addWrong(qi){const w=getWrong();if(!w.includes(qi)){w.push(qi);setWrong(w)}updateWrongCount()}
+function clearWrong(){setWrong([]);updateWrongCount();showWrong()}
+function updateWrongCount(){$('wrongCount').textContent=getWrong().length}
+function showWrong(){
+  const w=getWrong();
+  const card=$('wrongCard');card.style.display='block';
+  if(!w.length){$('wrongBox').innerHTML='<div class="empty">暂无错题，继续加油！</div>';return}
+  $('wrongBox').innerHTML=w.map(qi=>{
+    const q=QUESTIONS[qi];
+    return `<div class="wrong-item"><div class="wi-q">${esc(q.q)}</div>
+      <div>你的答案：<span class="wi-y">${esc(q.opts[q.ans])}</span>　正确答案：<span class="wi-a">${esc(q.opts[q.ans])}</span></div>
+      <div class="muted small mt8">${esc(q.exp)}</div></div>`;
+  }).join('');
+  card.scrollIntoView({behavior:'smooth'});
+}
+
+/* ============================================================
+   使用说明：演示脚本
+   ============================================================ */
+function renderDemo(){
+  const steps=[
+    ["开场","各位评委老师好，我们项目是《兽学辅研——兽医微生物与药理一体化智能学习助手》。动医学习中，微生物分离鉴定流程复杂、攻毒实验计算繁琐，不同动物用药剂量、休药期极易混淆，我们以此为切入点开发本工具。"],
+    ["演示① 微生物辅助","点「病原检索」，演示「特征向导」：现场模拟镜检，依次选择革兰染色→形态→排列/芽孢，系统逐级缩小候选范围，精准锁定菌种；点开详情，展示菌落、镜下形态、生化鉴定、药敏判读与考点解析。"],
+    ["演示② 科研工具包","切到「LD₅₀ 计算」，载入示例攻毒死亡数据，一键自动算出半数致死量；同步展示小鼠攻毒实验流程、注意事项与实验记录模板，支撑细菌致病性本科毕设。"],
+    ["演示③ 药理速算","切到「兽药换算」，选择牛、选药物、输体重，一键完成给药剂量换算，同步弹出休药期、配伍禁忌提示；并展示药物分类对比表。"],
+    ["演示④ 刷题","切到「刷题练习」，现场做 1-2 题，即时判分解析；做错的自动进入错题本，可分类复盘。"],
+    ["收尾","本项目打通「病原鉴定→药敏判读→用药方案」学习链路，兼顾课程学习、实验实操与本科科研训练。后续将持续扩充菌种图谱与兽药数据库，优化计算模板。演示完毕，感谢各位老师！"]
+  ];
+  $('demoFlow').innerHTML=steps.map((s,i)=>`
+    <div class="flow-step"><div class="fs-n">${i+1}</div><div class="fs-t"><b>${s[0]}</b><span>${s[1]}</span></div></div>`).join('');
+}
+
+/* ============================================================
+   初始化
+   ============================================================ */
+buildFilters();
+renderAllBacteria();
+renderFlow();
+initDrugSelect();
+startQuiz();
+renderDemo();
+updateWrongCount();
+</script>
+</body>
+</html>
