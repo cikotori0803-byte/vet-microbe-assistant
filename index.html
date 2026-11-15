@@ -406,7 +406,7 @@
   <div class="panel" id="panel-drug">
     <div class="card">
       <h2><span class="bar"></span>给药剂量换算</h2>
-      <div class="hint">选择动物种类与药物，输入体重，一键换算单次给药剂量，并同步提示休药期与配伍禁忌。</div>
+      <div class="hint">选动物、药物、体重和药品规格，自动换算单次剂量、配液浓度与给药体积，并同步提示休药期与配伍禁忌。</div>
       <div class="grid3">
         <div><label class="f">动物种类</label>
           <select class="in" id="species" onchange="calcDrug()">
@@ -415,10 +415,16 @@
           </select>
         </div>
         <div><label class="f">药物</label>
-          <select class="in" id="drugSel" onchange="calcDrug()"></select>
+          <select class="in" id="drugSel" onchange="initSpecSelect()"></select>
         </div>
         <div><label class="f">体重（kg）</label>
           <input class="in" id="weight" type="number" min="0.1" step="0.1" value="20" oninput="calcDrug()" />
+        </div>
+        <div><label class="f">药品规格</label>
+          <select class="in" id="specSel" onchange="calcDrug()"></select>
+        </div>
+        <div id="diluteWrap"><label class="f">配液体积（mL）</label>
+          <input class="in" id="diluteVol" type="number" min="0.1" step="0.5" value="5" oninput="calcDrug()" />
         </div>
       </div>
       <div id="drugResult" class="mt12"></div>
@@ -840,8 +846,37 @@ const DRUGS = [
  dose:{牛:[0.05,0.1],羊:[0.05,0.1],猪:[0.05,0.1],犬:[0.02,0.05],猫:[0.02,0.05]},
  withdraw:"无明确休药期(急救用)",
  taboo:"与有机磷中毒时禁用解磷定以外的拟胆碱药",
- action:"解有机磷中毒、抑制腺体分泌", note:"急救用药"}
+  action:"解有机磷中毒、抑制腺体分泌", note:"急救用药"}
 ];
+
+/* ============================================================
+   数据层：兽药规格（粉针/注射液/片剂）
+   form: 粉=粉针需配液 / 液=注射液已配好 / 片=片剂口服
+   ============================================================ */
+const DRUG_SPECS = {
+  "青霉素G":[ {label:"80万IU/瓶 · 粉针", form:"粉", content:800000, unit:"IU"},
+              {label:"160万IU/瓶 · 粉针", form:"粉", content:1600000, unit:"IU"} ],
+  "氨苄西林":[ {label:"0.5g/瓶 · 粉针", form:"粉", content:500, unit:"mg"},
+               {label:"1g/瓶 · 粉针", form:"粉", content:1000, unit:"mg"} ],
+  "阿莫西林":[ {label:"1g/袋 · 粉剂", form:"粉", content:1000, unit:"mg"},
+               {label:"10% 注射液(100mg/mL)", form:"液", conc:100} ],
+  "头孢噻呋":[ {label:"0.5g/瓶 · 粉针", form:"粉", content:500, unit:"mg"},
+               {label:"1g/瓶 · 粉针", form:"粉", content:1000, unit:"mg"} ],
+  "庆大霉素":[ {label:"4% 注射液(40mg/mL)", form:"液", conc:40} ],
+  "恩诺沙星":[ {label:"2.5% 注射液(25mg/mL)", form:"液", conc:25},
+               {label:"10% 注射液(100mg/mL)", form:"液", conc:100} ],
+  "土霉素":[ {label:"1g/瓶 · 粉针", form:"粉", content:1000, unit:"mg"},
+             {label:"20% 注射液(200mg/mL)", form:"液", conc:200} ],
+  "多西环素":[ {label:"0.5g/瓶 · 粉剂", form:"粉", content:500, unit:"mg"} ],
+  "磺胺嘧啶":[ {label:"10% 注射液(100mg/mL)", form:"液", conc:100} ],
+  "伊维菌素":[ {label:"1% 注射液(10mg/mL)", form:"液", conc:10} ],
+  "阿苯达唑":[ {label:"100mg/片 · 片剂", form:"片", content:100, unit:"mg"} ],
+  "吡喹酮":[ {label:"200mg/片 · 片剂", form:"片", content:200, unit:"mg"} ],
+  "左旋咪唑":[ {label:"0.5g/瓶 · 粉剂", form:"粉", content:500, unit:"mg"} ],
+  "地塞米松":[ {label:"0.5% 注射液(5mg/mL)", form:"液", conc:5} ],
+  "氟尼辛葡甲胺":[ {label:"5% 注射液(50mg/mL)", form:"液", conc:50} ],
+  "阿托品":[ {label:"0.05% 注射液(0.5mg/mL)", form:"液", conc:0.5} ]
+};
 
 /* ============================================================
    数据层：习题库
@@ -1247,7 +1282,21 @@ function downloadText(name, content){
    ============================================================ */
 function initDrugSelect(){
   $('drugSel').innerHTML=DRUGS.map((d,i)=>`<option value="${i}">${d.name}（${d.cat}）</option>`).join('');
+  initSpecSelect();
+}
+function initSpecSelect(){
+  const d=DRUGS[+$('drugSel').value];
+  if(!d)return;
+  const specs=DRUG_SPECS[d.name]||[];
+  $('specSel').innerHTML=specs.length?specs.map((s,i)=>`<option value="${i}">${esc(s.label)}</option>`).join(''):`<option value="">—</option>`;
+  updateDiluteVisibility();
   calcDrug();
+}
+function updateDiluteVisibility(){
+  const d=DRUGS[+$('drugSel').value];
+  const specs=DRUG_SPECS[d.name]||[];
+  const spec=specs[+$('specSel').value];
+  $('diluteWrap').style.display=(spec&&spec.form==='粉')?'block':'none';
 }
 function calcDrug(){
   const d=DRUGS[+$('drugSel').value];
@@ -1258,6 +1307,25 @@ function calcDrug(){
   const [min,max]=d.dose[sp];
   const lo=min*w, hi=max*w;
   const unit=d.unit; const baseUnit=unit.replace('/kg','');
+  const specs=DRUG_SPECS[d.name]||[];
+  const spec=specs[+$('specSel').value];
+  updateDiluteVisibility();
+  let convHtml='';
+  if(spec){
+    if(spec.form==='粉'){
+      const vol=parseFloat($('diluteVol').value);
+      if(vol&&vol>0){
+        const conc=spec.content/vol;
+        convHtml=`<div class="dcell full"><div class="dk">💧 粉剂配液 → 给药体积</div><div class="dv">${esc(spec.label)}（${fmtDose(spec.content)} ${baseUnit}）加溶媒 ${vol} mL → 浓度 <b>${fmtDose(conc)} ${baseUnit}/mL</b><br>需抽取给药体积：<b style="color:var(--primary);font-size:16px">${fmtVol(lo/conc)} ~ ${fmtVol(hi/conc)} mL</b></div></div>`;
+      } else {
+        convHtml=`<div class="dcell full"><div class="dk">💧 粉剂配液 → 给药体积</div><div class="dv" style="color:var(--warn)">请填写配液体积（mL）</div></div>`;
+      }
+    } else if(spec.form==='液'){
+      convHtml=`<div class="dcell full"><div class="dk">💧 给药体积（注射液）</div><div class="dv">${esc(spec.label)}（浓度 ${spec.conc} ${baseUnit}/mL）<br>需抽取给药体积：<b style="color:var(--primary);font-size:16px">${fmtVol(lo/spec.conc)} ~ ${fmtVol(hi/spec.conc)} mL</b></div></div>`;
+    } else if(spec.form==='片'){
+      convHtml=`<div class="dcell full"><div class="dk">💊 给药片数（口服）</div><div class="dv">${esc(spec.label)}<br>需喂服：<b style="color:var(--primary);font-size:16px">${Math.ceil(lo/spec.content)} ~ ${Math.ceil(hi/spec.content)} 片</b>（向上取整）</div></div>`;
+    }
+  }
   $('drugResult').innerHTML=`
     <div class="result-box">
       <div class="spread">
@@ -1269,6 +1337,7 @@ function calcDrug(){
         <span class="badge b">${esc(d.cat)}</span>
       </div>
       <div class="detail-grid mt12" style="border:1px solid var(--border);border-radius:10px;overflow:hidden">
+        ${convHtml}
         <div class="dcell"><div class="dk">🎯 主要作用</div><div class="dv">${esc(d.action)}</div></div>
         <div class="dcell"><div class="dk">⏱ 休药期</div><div class="dv">${esc(d.withdraw)}</div></div>
         <div class="dcell full"><div class="dk">⚠️ 配伍禁忌</div><div class="dv" style="color:#b3261e">${esc(d.taboo)}</div></div>
@@ -1277,6 +1346,12 @@ function calcDrug(){
     </div>`;
 }
 function fmtDose(v){return v>=1000?Math.round(v).toLocaleString():v.toFixed(v<1?2:1).replace(/\.0+$/,'')}
+function fmtVol(v){
+  if(v>=100)return Math.round(v).toString();
+  if(v>=10)return v.toFixed(1).replace(/\.0+$/,'');
+  if(v>=1)return v.toFixed(2).replace(/0+$/,'').replace(/\.+$/,'');
+  return v.toFixed(3).replace(/0+$/,'').replace(/\.+$/,'');
+}
 
 /* ============================================================
    模块4：刷题练习
