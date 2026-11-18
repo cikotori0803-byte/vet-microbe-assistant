@@ -152,7 +152,10 @@
   .bcard .bimg{position:relative;height:130px;background:#f2f6fb;overflow:hidden;flex:none}
   .bcard .bimg img{width:100%;height:100%;object-fit:cover;display:block}
   .bcard .bimg .bimg-tag{position:absolute;left:8px;bottom:8px;background:rgba(31,45,61,.68);color:#fff;font-size:10.5px;padding:2px 8px;border-radius:5px;backdrop-filter:blur(2px)}
-  .detail-photo{border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;background:#f2f6fb}
+  .photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .photo-grid.single{grid-template-columns:1fr}
+  @media(max-width:600px){.photo-grid{grid-template-columns:1fr}}
+  .detail-photo{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#f2f6fb}
   .detail-photo img{width:100%;max-height:380px;object-fit:cover;display:block}
   .detail-photo .cap{padding:8px 12px;font-size:12px;color:var(--muted);background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
   .detail-photo .cap b{color:var(--text)}
@@ -541,7 +544,7 @@
    数据层：微生物知识库（兽医常见致病菌）
    ============================================================ */
 const BACTERIA = [
-{name:"金黄色葡萄球菌", img:"images/bacteria01.webp", en:"Staphylococcus aureus", gram:"G+", shape:"球菌", arrange:"葡萄串", spore:"无", oxygen:"兼性",
+{name:"金黄色葡萄球菌", img:"images/bacteria01.webp", img2:"images/bacteria01_micro.jpg", bioTags:["触酶+","凝固酶+","甘露醇发酵+","β溶血"], en:"Staphylococcus aureus", gram:"G+", shape:"球菌", arrange:"葡萄串", spore:"无", oxygen:"兼性",
  colony:"血琼脂上呈圆形、凸起、边缘整齐的金黄色不透明菌落，多为 β 溶血环。",
  micro:"革兰阳性球菌，呈葡萄串状排列，无芽孢、无鞭毛，部分有微荚膜。",
  biochem:"触酶阳性、凝固酶阳性、甘露醇发酵阳性、DNA 酶阳性。",
@@ -551,7 +554,7 @@ const BACTERIA = [
  treat:"乳腺炎/皮肤感染用青霉素类、头孢类；MRSA 感染用万古霉素等。",
  diff:"与链球菌鉴别：触酶阳性、葡萄串状排列。",
  points:["凝固酶阳性是主要毒力与鉴定指标","触酶试验用于与链球菌鉴别","β 溶血","耐甲氧西林金黄色葡萄球菌(MRSA)"]},
-{name:"无乳链球菌", img:"images/bacteria02.jpg", en:"Streptococcus agalactiae", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
+{name:"无乳链球菌", img:"images/bacteria02.jpg", img2:"images/bacteria02_micro.jpg", bioTags:["触酶-","CAMP+","马尿酸水解+","β溶血"], en:"Streptococcus agalactiae", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
  colony:"血琼脂上细小、灰白、湿润菌落，β 溶血；CAMP 试验阳性。",
  micro:"革兰阳性球菌，链状排列，无芽孢。",
  biochem:"CAMP 阳性、马尿酸钠水解阳性、触酶阴性。",
@@ -561,7 +564,7 @@ const BACTERIA = [
  treat:"青霉素类、头孢类，泌乳期配合干奶期治疗。",
  diff:"CAMP 试验阳性、马尿酸水解阳性可与其他链球菌区分。",
  points:["CAMP 试验阳性","奶牛乳腺炎主要病原","触酶阴性（链球菌属共同特征）"]},
-{name:"猪链球菌", img:"images/bacteria03.jpg", en:"Streptococcus suis", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
+{name:"猪链球菌", img:"images/bacteria03.jpg", img2:"images/bacteria03_micro.png", bioTags:["触酶-","α溶血"], en:"Streptococcus suis", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
  colony:"血琼脂上细小菌落，多为 α 溶血。",
  micro:"革兰阳性球菌，链状排列，多有荚膜。",
  biochem:"触酶阴性。",
@@ -571,7 +574,7 @@ const BACTERIA = [
  treat:"青霉素类、头孢菌素类，早用足量。",
  diff:"根据血清型（1、2、7、9 型）分型，2 型为重要人畜共患型。",
  points:["猪链球菌病","血清 2 型人畜共患","可致脑膜炎、败血症"]},
-{name:"马链球菌马亚种", img:"images/bacteria04.jpg", en:"Streptococcus equi subsp. equi", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
+{name:"马链球菌马亚种", img:"images/bacteria04.jpg", img2:"images/bacteria04_micro.jpg", bioTags:["触酶-","β溶血","山梨醇发酵+"], en:"Streptococcus equi subsp. equi", gram:"G+", shape:"球菌", arrange:"链状", spore:"无", oxygen:"兼性",
  colony:"血琼脂上呈黏液状、β 溶血，长链状排列。",
  micro:"革兰阳性球菌，呈长链排列。",
  biochem:"触酶阴性，发酵山梨醇、不发酵海藻糖。",
@@ -581,7 +584,7 @@ const BACTERIA = [
  treat:"青霉素，脓肿成熟后切开排脓。",
  diff:"马腺疫链球菌，长链、黏液状菌落。",
  points:["马腺疫病原","幼驹常见"]},
-{name:"炭疽芽孢杆菌", img:"images/bacteria05.jpg", en:"Bacillus anthracis", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"需氧",
+{name:"炭疽芽孢杆菌", img:"images/bacteria05.jpg", bioTags:["触酶+","明胶液化+","青霉素串珠试验+"], en:"Bacillus anthracis", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"需氧",
  colony:"灰白色、粗糙、边缘不整齐的卷发状(R 型)菌落。",
  micro:"革兰阳性粗大杆菌，竹节状排列，有荚膜，芽孢位于中央、椭圆形。",
  biochem:"触酶阳性，能液化明胶。",
@@ -591,7 +594,7 @@ const BACTERIA = [
  treat:"青霉素，皮肤型、肠型、肺型炭疽早期治疗。",
  diff:"卷发状菌落、竹节状排列、Ascoli 沉淀反应阳性。",
  points:["卷发状菌落","竹节状排列","人畜共患","Ascoli 沉淀反应"]},
-{name:"产气荚膜梭菌", img:"images/bacteria06.png", en:"Clostridium perfringens", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
+{name:"产气荚膜梭菌", img:"images/bacteria06.png", img2:"images/bacteria06_micro.png", bioTags:["触酶-","卵磷脂酶+","牛奶暴烈发酵+","双溶血环+","分解糖类产气+"], en:"Clostridium perfringens", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
  colony:"血琼脂双溶血环；卵黄琼脂(Nagler)上乳白浑浊（卵磷脂酶）。",
  micro:"革兰阳性粗大杆菌，有荚膜，芽孢位于中央或近端。",
  biochem:"卵磷脂酶(α 毒素)阳性、牛奶培养基「暴烈发酵」。",
@@ -601,7 +604,7 @@ const BACTERIA = [
  treat:"清创 + 青霉素，必要时高压氧治疗。",
  diff:"双溶血环、牛奶暴烈发酵、卵磷脂酶阳性。",
  points:["双溶血环","牛奶暴烈发酵","羊猝狙病原"]},
-{name:"破伤风梭菌", img:"images/bacteria07.jpg", en:"Clostridium tetani", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
+{name:"破伤风梭菌", img:"images/bacteria07.jpg", img2:"images/bacteria07_micro.jpg", bioTags:["触酶-","不发酵糖类","明胶液化+"], en:"Clostridium tetani", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
  colony:"血琼脂上呈薄膜状迁徙生长，可溶血。",
  micro:"革兰阳性杆菌，芽孢位于末端、呈鼓槌状。",
  biochem:"不发酵糖类，明胶液化。",
@@ -611,7 +614,7 @@ const BACTERIA = [
  treat:"清创 + 青霉素 + 破伤风抗毒素，对症镇痉。",
  diff:"鼓槌状芽孢、不发酵糖类。",
  points:["鼓槌状芽孢","痉挛毒素","厌氧环境致病"]},
-{name:"肉毒梭菌", img:"images/bacteria08.webp", en:"Clostridium botulinum", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
+{name:"肉毒梭菌", img:"images/bacteria08.webp", img2:"images/bacteria08_micro.webp", bioTags:["触酶-","明胶液化+","芽孢大于菌体"], en:"Clostridium botulinum", gram:"G+", shape:"杆菌", arrange:"—", spore:"有", oxygen:"厌氧",
  colony:"血琼脂上β溶血，边缘呈羽毛状。",
  micro:"革兰阳性杆菌，芽孢偏端、椭圆形，呈网球拍状。",
  biochem:"水解明胶，产生神经毒素。",
@@ -621,7 +624,7 @@ const BACTERIA = [
  treat:"尽早用多价抗毒素，对症支持。",
  diff:"网球拍状芽孢、神经毒素。",
  points:["肉毒毒素毒性最强","引起肌肉麻痹","食物中毒"]},
-{name:"单核细胞增生李斯特菌", img:"images/bacteria09.jpg", en:"Listeria monocytogenes", gram:"G+", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"单核细胞增生李斯特菌", img:"images/bacteria09.jpg", img2:"images/bacteria09_micro.png", bioTags:["触酶+","25℃动力+","37℃动力-","窄β溶血"], en:"Listeria monocytogenes", gram:"G+", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"血琼脂上窄 β 溶血；半固体培养基 25℃ 呈「伞状」生长。",
  micro:"革兰阳性小杆菌，直或微弯。",
  biochem:"触酶阳性；25℃ 有动力、37℃ 无动力。",
@@ -631,7 +634,7 @@ const BACTERIA = [
  treat:"氨苄西林 + 庆大霉素。",
  diff:"25℃ 动力阳性、37℃ 动力阴性（伞状生长）。",
  points:["25℃ 有动力、37℃ 无动力","人畜共患","可引起流产"]},
-{name:"猪丹毒丝菌", img:"images/bacteria10.jpg", en:"Erysipelothrix rhusiopathiae", gram:"G+", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"猪丹毒丝菌", img:"images/bacteria10.jpg", bioTags:["触酶-","H2S+","三糖铁底层变黄"], en:"Erysipelothrix rhusiopathiae", gram:"G+", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"光滑型(S)细小透明菌落，粗糙型(R)较大、边缘不齐。",
  micro:"革兰阳性纤细长杆菌，多形性，直或微弯。",
  biochem:"触酶阴性，H₂S 阳性。",
@@ -641,7 +644,7 @@ const BACTERIA = [
  treat:"青霉素。",
  diff:"H₂S 阳性、触酶阴性。",
  points:["猪丹毒菱形疹块","H₂S 阳性"]},
-{name:"大肠杆菌", img:"images/bacteria11.png", en:"Escherichia coli", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"大肠杆菌", img:"images/bacteria11.png", img2:"images/bacteria11_micro.jpg", bioTags:["触酶+","乳糖发酵+","吲哚+","IMViC++--","麦康凯红色菌落"], en:"Escherichia coli", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"麦康凯平板上呈红色（乳糖发酵）菌落；伊红美蓝(EMB)平板呈紫黑色金属光泽。",
  micro:"革兰阴性短杆菌，两端钝圆。",
  biochem:"乳糖发酵阳性、吲哚阳性，IMViC = + + - -。",
@@ -651,7 +654,7 @@ const BACTERIA = [
  treat:"氨基糖苷类、氟喹诺酮类，注意药敏。",
  diff:"麦康凯红色菌落、EMB 金属光泽、IMViC + + - -。",
  points:["麦康凯平板上红色菌落","EMB 紫黑色金属光泽","IMViC = + + - -","仔猪黄白痢"]},
-{name:"沙门氏菌", img:"images/bacteria12.png", en:"Salmonella", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"沙门氏菌", img:"images/bacteria12.png", bioTags:["触酶+","乳糖发酵-","H2S+","IMViC-+-+","麦康凯无色菌落"], en:"Salmonella", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"麦康凯平板上呈无色（乳糖不发酵）菌落；SS 平板黑色中心菌落。",
  micro:"革兰阴性杆菌，多有周身鞭毛。",
  biochem:"乳糖不发酵、H₂S 阳性、IMViC = - + - +。",
@@ -661,7 +664,7 @@ const BACTERIA = [
  treat:"氟喹诺酮类、头孢菌素类。",
  diff:"麦康凯无色(乳糖-)、H₂S 阳性、SS 黑色中心。",
  points:["麦康凯平板上无色菌落(乳糖-)","H₂S 阳性","鸡白痢病原","人畜共患食物中毒"]},
-{name:"多杀性巴氏杆菌", img:"images/bacteria13.jpg", en:"Pasteurella multocida", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"多杀性巴氏杆菌", img:"images/bacteria13.jpg", img2:"images/bacteria13_micro.jpg", bioTags:["触酶+","氧化酶+","吲哚+","乳糖发酵-","两极浓染"], en:"Pasteurella multocida", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"血琼脂上细小、灰白、不溶血菌落。",
  micro:"革兰阴性短杆菌，瑞氏/美蓝染色呈两极浓染。",
  biochem:"氧化酶阳性、触酶阳性、吲哚阳性、乳糖不发酵。",
@@ -671,7 +674,7 @@ const BACTERIA = [
  treat:"青霉素类、头孢类、氟喹诺酮类。",
  diff:"两极浓染、吲哚阳性。",
  points:["两极浓染","禽霍乱病原","猪肺疫病原"]},
-{name:"布鲁氏菌", img:"images/bacteria14.jpg", en:"Brucella", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
+{name:"布鲁氏菌", img:"images/bacteria14.jpg", img2:"images/bacteria14_micro.jpg", bioTags:["氧化酶+","脲酶+","需CO2","柯兹洛夫斯基染色+"], en:"Brucella", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
  colony:"细小、圆形、凸起、光滑菌落，初代需 5-10% CO₂。",
  micro:"革兰阴性小球杆菌，柯兹洛夫斯基染色呈红色。",
  biochem:"氧化酶阳性、脲酶阳性、需 CO₂。",
@@ -681,7 +684,7 @@ const BACTERIA = [
  treat:"人多西环素 + 利福平；患病畜扑杀净化。",
  diff:"柯兹洛夫斯基染色、脲酶阳性、需 CO₂。",
  points:["人畜共患","引起流产","波浪热","柯兹洛夫斯基染色"]},
-{name:"猪胸膜肺炎放线杆菌", img:"images/bacteria15.jpg", en:"Actinobacillus pleuropneumoniae", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"猪胸膜肺炎放线杆菌", img:"images/bacteria15.jpg", img2:"images/bacteria15_micro.png", bioTags:["触酶+","脲酶+","需V因子","β溶血"], en:"Actinobacillus pleuropneumoniae", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"血琼脂上 β 溶血，需 V 因子（NAD）生长。",
  micro:"革兰阴性小杆菌，两端钝圆。",
  biochem:"脲酶阳性、需 V 因子。",
@@ -691,7 +694,7 @@ const BACTERIA = [
  treat:"头孢噻呋、氟苯尼考、替米考星。",
  diff:"β 溶血、需 V 因子。",
  points:["猪传染性胸膜肺炎病原","需 V 因子(NAD)"]},
-{name:"副猪嗜血杆菌", img:"images/bacteria16.jpg", en:"Haemophilus parasuis", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"副猪嗜血杆菌", img:"images/bacteria16.jpg", img2:"images/bacteria16_micro.jpg", bioTags:["触酶+","需V因子","卫星现象+","脲酶-","吲哚-"], en:"Haemophilus parasuis", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"与金黄色葡萄球菌共培养呈「卫星现象」。",
  micro:"革兰阴性小杆菌，多形性。",
  biochem:"需 V 因子(NAD)，卫星现象阳性。",
@@ -701,7 +704,7 @@ const BACTERIA = [
  treat:"头孢类、恩诺沙星。",
  diff:"NAD 依赖、卫星现象。",
  points:["卫星现象","格拉泽病病原"]},
-{name:"支气管败血波氏杆菌", img:"images/bacteria17.png", en:"Bordetella bronchiseptica", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
+{name:"支气管败血波氏杆菌", img:"images/bacteria17.png", img2:"images/bacteria17_micro.png", bioTags:["氧化酶+","脲酶+","触酶+"], en:"Bordetella bronchiseptica", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
  colony:"麦康凯平板可生长，细小灰白菌落。",
  micro:"革兰阴性小杆菌。",
  biochem:"氧化酶阳性、触酶阳性、尿素酶阳性。",
@@ -711,7 +714,7 @@ const BACTERIA = [
  treat:"多西环素、氟苯尼考。",
  diff:"尿素酶阳性、氧化酶阳性。",
  points:["猪萎缩性鼻炎病原","犬窝咳病原"]},
-{name:"结核分枝杆菌/牛分枝杆菌", img:"images/bacteria18.jpg", en:"Mycobacterium tuberculosis/bovis", gram:"抗酸", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
+{name:"结核分枝杆菌/牛分枝杆菌", img:"images/bacteria18.jpg", img2:"images/bacteria18_micro.jpg", bioTags:["抗酸染色+","烟酸试验+","生长缓慢"], en:"Mycobacterium tuberculosis/bovis", gram:"抗酸", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
  colony:"罗氏培养基上呈菜花状、粗糙、干燥菌落，生长缓慢（2-8 周）。",
  micro:"抗酸染色阳性，呈红色细长杆菌。",
  biochem:"抗酸染色阳性、耐酸、耐碱。",
@@ -721,7 +724,7 @@ const BACTERIA = [
  treat:"异烟肼、利福平联合用药。",
  diff:"抗酸染色阳性、罗氏培养基生长缓慢。",
  points:["抗酸染色阳性","罗氏培养基","结核菌素试验(迟发型变态反应)"]},
-{name:"钩端螺旋体", img:"images/bacteria19.jpg", en:"Leptospira", gram:"螺旋体", shape:"螺旋体", arrange:"—", spore:"无", oxygen:"需氧",
+{name:"钩端螺旋体", img:"images/bacteria19.jpg", img2:"images/bacteria19_micro.jpg", bioTags:["暗视野运动+","镀银染色+"], en:"Leptospira", gram:"螺旋体", shape:"螺旋体", arrange:"—", spore:"无", oxygen:"需氧",
  colony:"柯索夫(Korthof)培养基上云雾状生长。",
  micro:"暗视野显微镜下呈钩状、螺旋状运动，镀银染色呈棕黑色。",
  biochem:"需血清培养基，氧化酶阳性。",
@@ -731,7 +734,7 @@ const BACTERIA = [
  treat:"青霉素、多西环素。",
  diff:"暗视野运动、镀银染色棕黑色。",
  points:["暗视野检查","镀银染色","人畜共患"]},
-{name:"猪肺炎支原体", img:"images/bacteria20.jpg", en:"Mycoplasma hyopneumoniae", gram:"支原体", shape:"支原体", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"猪肺炎支原体", img:"images/bacteria20.jpg", img2:"images/bacteria20_micro.jpg", bioTags:["无细胞壁","荷包蛋状菌落","青霉素天然耐药"], en:"Mycoplasma hyopneumoniae", gram:"支原体", shape:"支原体", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"固体培养基上呈「荷包蛋」状菌落，生长需胆固醇。",
  micro:"无细胞壁，多形性，吉姆萨染色。",
  biochem:"无细胞壁，对 β-内酰胺类天然耐药。",
@@ -741,7 +744,7 @@ const BACTERIA = [
  treat:"泰妙菌素、泰乐菌素、土霉素。",
  diff:"无细胞壁、荷包蛋状菌落、对青霉素天然耐药。",
  points:["无细胞壁","猪气喘病病原","对 β-内酰胺类天然耐药"]},
-{name:"鸡毒支原体", img:"images/bacteria21.png", en:"Mycoplasma gallisepticum", gram:"支原体", shape:"支原体", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"鸡毒支原体", img:"images/bacteria21.png", img2:"images/bacteria21_micro.jpg", bioTags:["无细胞壁","荷包蛋状菌落","发酵葡萄糖+"], en:"Mycoplasma gallisepticum", gram:"支原体", shape:"支原体", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"「荷包蛋」状菌落。",
  micro:"无细胞壁，多形性。",
  biochem:"需胆固醇生长。",
@@ -751,7 +754,7 @@ const BACTERIA = [
  treat:"泰乐菌素、泰妙菌素。",
  diff:"无细胞壁、荷包蛋状菌落。",
  points:["鸡慢性呼吸道病病原","无细胞壁"]},
-{name:"铜绿假单胞菌", img:"images/bacteria22.jpg", en:"Pseudomonas aeruginosa", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
+{name:"铜绿假单胞菌", img:"images/bacteria22.jpg", img2:"images/bacteria22_micro.jpg", bioTags:["触酶+","氧化酶+","绿脓素+","42℃生长+"], en:"Pseudomonas aeruginosa", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"需氧",
  colony:"产生绿色水溶性色素，有生姜气味。",
  micro:"革兰阴性杆菌，单个或成对排列。",
  biochem:"氧化酶阳性、产生绿脓菌素。",
@@ -761,7 +764,7 @@ const BACTERIA = [
  treat:"庆大霉素、多粘菌素、喹诺酮类（易耐药，做药敏）。",
  diff:"绿色色素、生姜味、氧化酶阳性。",
  points:["绿色水溶性色素","条件致病菌","易产生耐药"]},
-{name:"变形杆菌", img:"images/bacteria23.jpg", en:"Proteus", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
+{name:"变形杆菌", img:"images/bacteria23.jpg", img2:"images/bacteria23_micro.jpg", bioTags:["触酶+","脲酶+","苯丙氨酸脱氨酶+","迁徙生长+","H2S+"], en:"Proteus", gram:"G-", shape:"杆菌", arrange:"—", spore:"无", oxygen:"兼性",
  colony:"血琼脂上呈「迁徙生长」的波纹状菌膜。",
  micro:"革兰阴性杆菌，多形性。",
  biochem:"脲酶阳性、苯丙氨酸脱氨酶阳性、H₂S 阳性。",
@@ -771,7 +774,7 @@ const BACTERIA = [
  treat:"头孢类、氟喹诺酮类。",
  diff:"迁徙生长、脲酶阳性。",
  points:["迁徙生长","脲酶阳性"]},
-{name:"空肠弯曲杆菌", img:"images/bacteria24.jpg", en:"Campylobacter jejuni", gram:"G-", shape:"弧菌", arrange:"—", spore:"无", oxygen:"微需氧",
+{name:"空肠弯曲杆菌", img:"images/bacteria24.jpg", img2:"images/bacteria24_micro.png", bioTags:["触酶+","氧化酶+","触酶+","马尿酸水解+","微需氧"], en:"Campylobacter jejuni", gram:"G-", shape:"弧菌", arrange:"—", spore:"无", oxygen:"微需氧",
  colony:"微需氧培养，细小、湿润菌落。",
  micro:"革兰阴性弯曲菌，呈 S 形、海鸥状。",
  biochem:"氧化酶阳性、触酶阳性、微需氧。",
@@ -927,7 +930,25 @@ const QUESTIONS = [
 {q:"伊维菌素主要用于驱除？", opts:["吸虫","绦虫","线虫与外寄生虫","球虫"], ans:2, exp:"伊维菌素属大环内酯类抗寄生虫药，主要用于线虫和外寄生虫(螨、虱等)。"},
 {q:"休药期的定义是？", opts:["用药到痊愈的时间","最后一次用药到上市屠宰的最小间隔","首次用药到停药时间","药物在体内半衰期"], ans:1, exp:"休药期指最后一次给药至动物产品(肉、奶、蛋)上市允许屠宰/销售的最小间隔时间。"},
 {q:"犬窝咳(犬传染性支气管炎)的主要病原之一是？", opts:["支气管败血波氏杆菌","沙门氏菌","布鲁氏菌","炭疽杆菌"], ans:0, exp:"支气管败血波氏杆菌是犬窝咳和猪萎缩性鼻炎的病原之一。"},
-{q:"布鲁氏菌病最重要的公共卫生意义是？", opts:["引起腹泻","人畜共患并致流产","呼吸道传播","仅感染猪"], ans:1, exp:"布鲁氏菌病是人畜共患病，主要引起流产、附睾炎，人感染表现为波浪热。"}
+{q:"布鲁氏菌病最重要的公共卫生意义是？", opts:["引起腹泻","人畜共患并致流产","呼吸道传播","仅感染猪"], ans:1, exp:"布鲁氏菌病是人畜共患病，主要引起流产、附睾炎，人感染表现为波浪热。"},
+{q:"触酶试验中，滴加 3% 过氧化氢后出现气泡，说明该菌为？", opts:["葡萄球菌属","链球菌属","弯曲菌属","布鲁氏菌"], ans:0, exp:"触酶（过氧化氢酶）阳性是葡萄球菌属的重要特征；链球菌属触酶阴性，这是两属最经典的鉴别试验。"},
+{q:"下列哪种细菌的触酶试验为阴性？", opts:["金黄色葡萄球菌","无乳链球菌","铜绿假单胞菌","炭疽芽孢杆菌"], ans:1, exp:"链球菌属（含无乳链球菌）触酶阴性；葡萄球菌、假单胞菌、芽孢杆菌多为触酶阳性。"},
+{q:"大肠杆菌在伊红美蓝(EMB)平板上的典型菌落是？", opts:["红色菌落","无色菌落","紫黑色带金属光泽","粉红色菌落"], ans:2, exp:"大肠杆菌发酵乳糖产酸，在 EMB 平板上呈紫黑色并带金属光泽；不发酵乳糖的沙门氏菌则为无色透明菌落。"},
+{q:"IMViC 试验中，大肠杆菌的经典结果是？", opts:["++--","-+-+","+--","--++"], ans:0, exp:"大肠杆菌 IMViC = ++--（吲哚+、甲基红+、VP-、枸橼酸盐-）；沙门氏菌为 -+-+，是肠杆菌科鉴别的经典组合。"},
+{q:"卫星现象是下列哪种菌的培养特征？", opts:["副猪嗜血杆菌","大肠杆菌","多杀性巴氏杆菌","猪丹毒丝菌"], ans:0, exp:"副猪嗜血杆菌生长需 V 因子(NAD)，与金黄色葡萄球菌共培养时围绕其菌落呈「卫星样」生长。"},
+{q:"「荷包蛋样」菌落是下列哪类微生物的典型特征？", opts:["支原体","衣原体","立克次体","螺旋体"], ans:0, exp:"支原体无细胞壁，固体培养基上菌落典型呈荷包蛋状（中央致密隆起、边缘薄而透明）。"},
+{q:"产气荚膜梭菌在牛奶培养基中引起的特征现象是？", opts:["暴烈发酵","迁徙生长","卫星现象","彩虹环"], ans:0, exp:"产气荚膜梭菌发酵乳糖大量产酸产气，凝块被气体冲成分层蜂窝状，称「暴烈发酵」（stormy fermentation）。"},
+{q:"双溶血环（内环完全溶血、外环不完全溶血）见于哪种菌？", opts:["产气荚膜梭菌","破伤风梭菌","肉毒梭菌","结核分枝杆菌"], ans:0, exp:"产气荚膜梭菌的 α 毒素（完全溶血）与 θ 毒素（不完全溶血）共同形成特征性双溶血环。"},
+{q:"抗酸染色中，结核分枝杆菌被染成什么颜色？", opts:["红色","紫色","蓝色","棕色"], ans:0, exp:"抗酸杆菌细胞壁含大量分枝菌酸，可抵抗盐酸酒精脱色，保留石炭酸复红的红色。"},
+{q:"布鲁氏菌初次分离培养时常需要的气体条件是？", opts:["5%~10% CO₂","纯氮气","纯氧环境","高浓度 CO"], ans:0, exp:"布鲁氏菌（尤其牛布氏杆菌）初代培养需 5%~10% CO₂ 环境，生长缓慢。"},
+{q:"多杀性巴氏杆菌经瑞氏染色后的特征性形态是？", opts:["两极浓染","异染颗粒","芽孢深染","荚膜着色"], ans:0, exp:"巴氏杆菌菌体两端着色深、中央浅，称「两极浓染」，是其经典形态学鉴别特征。"},
+{q:"变形杆菌在普通琼脂平板上的特征生长现象是？", opts:["迁徙生长","局限圆形菌落","溶血环","产生色素"], ans:0, exp:"变形杆菌有周身鞭毛，在湿润琼脂表面呈波纹状「迁徙生长」（swarming），可覆盖整个平板。"},
+{q:"空肠弯曲杆菌最适培养条件是？", opts:["微需氧(5% O₂ + 10% CO₂)","严格厌氧","纯氧","高渗环境"], ans:0, exp:"弯曲菌为微需氧菌（5% O₂、10% CO₂、85% N₂），镜下呈海鸥形/S 形，是重要人畜共患腹泻病原。"},
+{q:"支原体对青霉素天然耐药的原因是？", opts:["无细胞壁","产生 β-内酰胺酶","外膜蛋白变异","药物外排泵"], ans:0, exp:"青霉素抑制细胞壁肽聚糖合成，而支原体本身无细胞壁，故对 β-内酰胺类抗生素天然耐药。"},
+{q:"产气荚膜梭菌与破伤风梭菌在糖代谢上的重要区别是？", opts:["前者分解糖类产酸产气，后者不分解糖类","两者均不分解糖","前者不分解糖，后者分解糖","两者均分解糖产气"], ans:0, exp:"产气荚膜梭菌分解多种糖类产酸产气（暴烈发酵）；破伤风梭菌不分解糖类，以蛋白分解代谢为主。"},
+{q:"Reed-Muench 法计算 LD₅₀ 时需要的累计数据是？", opts:["累计死亡数与累计存活数","平均体重变化","攻毒总体积","菌液 OD 值"], ans:0, exp:"Reed-Muench 累加法：按剂量由小到大累计死亡数、由大到小累计存活数，计算累计死亡率跨越 50% 的区间后内插。"},
+{q:"头孢噻呋属于第几代头孢菌素？", opts:["第一代","第二代","第三代","第四代"], ans:2, exp:"头孢噻呋是动物专用第三代头孢菌素，抗菌谱广，对 G⁻ 菌及产 β-内酰胺酶菌效果佳。"},
+{q:"磺胺类药物首次给药的剂量原则是？", opts:["首剂加倍","首剂减半","小剂量递增","固定小剂量"], ans:0, exp:"磺胺药首剂加倍（突击量）以迅速达到有效血药浓度，后续维持量维持浓度。"}
 ];
 
 /* ============================================================
@@ -1007,9 +1028,18 @@ function showDetail(name){
       <span class="tag">${esc(b.oxygen==='兼性'?'兼性厌氧':b.oxygen==='需氧'?'专性需氧':b.oxygen==='厌氧'?'专性厌氧':'微需氧')}</span>
       <span class="tag">${b.spore==='有'?'有芽孢':'无芽孢'}</span>
     </div>
-    ${b.img?`<div class="detail-photo mt12">
-      <img src="${esc(b.img)}" alt="${esc(b.name)}真实照片" onerror="this.parentNode.style.display='none'">
-      <div class="cap"><span><b>📷 ${esc(b.name)}</b> 真实照片（${b.name==='猪肺炎支原体'?'临床病例照片':'菌落/镜下形态'}）</span><span>仅供教学参考</span></div>
+    ${(b.img||b.img2)?`<div class="photo-grid mt12${b.img&&b.img2?'':' single'}">
+      ${b.img?`<div class="detail-photo">
+        <img src="${esc(b.img)}" alt="${esc(b.name)}照片" onerror="this.parentNode.style.display='none'">
+        <div class="cap"><span><b>📷 ${esc(b.name)}</b> ${b.name==='猪肺炎支原体'?'临床病例照片':(b.name==='炭疽芽孢杆菌'?'镜下形态(革兰染色涂片)':'菌落/宏观照片')}</span><span>仅供教学参考</span></div>
+      </div>`:''}
+      ${b.img2?`<div class="detail-photo">
+        <img src="${esc(b.img2)}" alt="${esc(b.name)}镜下形态" onerror="this.parentNode.style.display='none'">
+        <div class="cap"><span><b>🔬 ${esc(b.name)}</b> 镜下形态照片</span><span>仅供教学参考</span></div>
+      </div>`:''}
+    </div>`:''}
+    ${b.bioTags?`<div class="mt12"><label class="f">生化反应标记（可用于下方特征筛选）</label>
+      <div class="chips">${b.bioTags.map(t=>`<span class="tag" style="cursor:default">${esc(t)}</span>`).join('')}</div>
     </div>`:''}
     <div class="detail-grid mt12">
       <div class="dcell"><div class="dk">🧫 菌落特征</div><div class="dv">${esc(b.colony)}</div></div>
@@ -1032,18 +1062,27 @@ const FILTER_DEFS=[
   {key:'shape', label:'镜下形态', options:['球菌','杆菌','弧菌','螺旋体','支原体']},
   {key:'arrange', label:'球菌排列', options:['葡萄串','链状']},
   {key:'spore', label:'芽孢(杆菌)', options:['有','无']},
-  {key:'oxygen', label:'氧需求', options:['需氧','厌氧','兼性','微需氧']}
+  {key:'oxygen', label:'氧需求', options:['需氧','厌氧','兼性','微需氧']},
+  {key:'bio', label:'生化反应（可多选）', multi:true, options:['触酶+','触酶-','氧化酶+','乳糖发酵+','乳糖发酵-','H2S+','吲哚+','脲酶+','凝固酶+','CAMP+','β溶血','α溶血','明胶液化+','抗酸染色+','需V因子','无细胞壁','麦康凯红色菌落','麦康凯无色菌落']}
 ];
 let filters={};
 function buildFilters(){
   $('filterBox').innerHTML=FILTER_DEFS.map(f=>{
+    const onFn = f.multi ? `filters.${f.key}&&filters.${f.key}.includes('${'${'}o${'}'}')` : `filters.${f.key}==='${'${'}o${'}'}'`;
     return `<div style="margin-bottom:14px"><label class="f">${f.label}</label>
-      <div class="chips">${f.options.map(o=>`<button class="chip ${filters[f.key]===o?'on':''}" onclick="toggleFilter('${f.key}','${o}')">${o}</button>`).join('')}</div></div>`;
+      <div class="chips">${f.options.map(o=>`<button class="chip ${(f.multi?(filters[f.key]||[]).includes(o):filters[f.key]===o)?'on':''}" onclick="toggleFilter('${f.key}','${o}')">${o}</button>`).join('')}</div></div>`;
   }).join('');
   applyFilters();
 }
 function toggleFilter(k,v){
-  if(filters[k]===v)filters[k]=null; else filters[k]=v;
+  if(k==='bio'){
+    const arr=filters.bio||[];
+    const i=arr.indexOf(v);
+    if(i>=0)arr.splice(i,1); else arr.push(v);
+    if(arr.length)filters.bio=arr; else delete filters.bio;
+  } else {
+    if(filters[k]===v)filters[k]=null; else filters[k]=v;
+  }
   buildFilters();
 }
 function clearFilters(){filters={};buildFilters()}
@@ -1051,6 +1090,7 @@ function applyFilters(){
   let res=BACTERIA.filter(b=>{
     for(const k in filters){const v=filters[k];if(!v)continue;
       if(k==='arrange' && b.shape!=='球菌')return false;
+      if(k==='bio'){ if(!(v.every(t=>(b.bioTags||[]).includes(t))))return false; continue; }
       if(b[k]!==v)return false;
     }
     return true;
@@ -1083,7 +1123,13 @@ const WIZ_STEPS=[
     {v:'需氧', label:'专性需氧', d:'必须有氧'},
     {v:'厌氧', label:'专性厌氧', d:'厌氧环境生长'},
     {v:'兼性', label:'兼性厌氧', d:'有氧无氧均可'},
-    {v:'微需氧', label:'微需氧', d:'低氧浓度生长'}]}
+    {v:'微需氧', label:'微需氧', d:'低氧浓度生长'}]},
+  {key:'bio', q:'第五步：触酶试验（3% H₂O₂）结果？', options:[
+    {v:'触酶+', label:'触酶阳性', d:'滴加过氧化氢冒气泡'},
+    {v:'触酶-', label:'触酶阴性', d:'无气泡产生'}]},
+  {key:'lactose', q:'第六步：乳糖发酵试验？', cond:(s)=>s.gram==='G-'&&s.shape==='杆菌', options:[
+    {v:'乳糖发酵+', label:'发酵乳糖', d:'麦康凯上红色菌落'},
+    {v:'乳糖发酵-', label:'不发酵乳糖', d:'麦康凯上无色菌落'}]}
 ];
 let wizState={}, wizIdx=0;
 function startWizard(){wizState={};wizIdx=0;renderWizard()}
@@ -1121,7 +1167,7 @@ function renderWizard(){
     </div>`;
 }
 function iconFor(v){
-  const m={'G+':'＋','G-':'－','抗酸':'抗','支原体':'∅','螺旋体':'〜','球菌':'●','杆菌':'▭','弧菌':'⌒','葡萄串':'♧','链状':'⌁','有':'有','无':'无','需氧':'O₂','厌氧':'✕','兼性':'±','微需氧':'½'};
+  const m={'G+':'＋','G-':'－','抗酸':'抗','支原体':'∅','螺旋体':'〜','球菌':'●','杆菌':'▭','弧菌':'⌒','葡萄串':'♧','链状':'⌁','有':'有','无':'无','需氧':'O₂','厌氧':'✕','兼性':'±','微需氧':'½','触酶+':'酶+','触酶-':'酶-','乳糖发酵+':'乳+','乳糖发酵-':'乳-'};
   return m[v]||'?';
 }
 function filterByWiz(){
@@ -1129,6 +1175,7 @@ function filterByWiz(){
     for(const k in wizState){const v=wizState[k];if(!v)continue;
       if(k==='arrange' && b.shape!=='球菌')return false;
       if(k==='spore' && b.shape!=='杆菌')return false;
+      if(k==='bio' || k==='lactose'){ if(!(b.bioTags||[]).includes(v))return false; continue; }
       if(b[k]!==v)return false;
     }
     return true;
